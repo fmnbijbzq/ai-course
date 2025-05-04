@@ -1,0 +1,267 @@
+basePath: /
+definitions:
+  service.ClassAddRequest:
+    properties:
+      class_name:
+        maxLength: 50
+        minLength: 2
+        type: string
+    required:
+    - class_name
+    type: object
+  service.ClassEditRequest:
+    properties:
+      class_name:
+        maxLength: 50
+        minLength: 2
+        type: string
+    required:
+    - class_name
+    type: object
+  service.UserLoginRequest:
+    properties:
+      password:
+        type: string
+      student_id:
+        type: string
+    required:
+    - password
+    - student_id
+    type: object
+  service.UserRegisterRequest:
+    properties:
+      name:
+        minLength: 2
+        type: string
+      password:
+        minLength: 6
+        type: string
+      student_id:
+        minLength: 5
+        type: string
+    required:
+    - name
+    - password
+    - student_id
+    type: object
+host: localhost:8080
+info:
+  contact:
+    email: support@swagger.io
+    name: API Support
+    url: http://www.swagger.io/support
+  description: This is the API documentation for AI Course Management System
+  license:
+    name: Apache 2.0
+    url: http://www.apache.org/licenses/LICENSE-2.0.html
+  termsOfService: http://swagger.io/terms/
+  title: AI Course API
+  version: "1.0"
+paths:
+  /class/{id}:
+    delete:
+      description: 删除指定班级
+      parameters:
+      - description: 班级ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      responses:
+        "200":
+          description: 删除成功
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: 请求参数错误
+          schema:
+            additionalProperties: true
+            type: object
+        "404":
+          description: 班级不存在
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: 服务器内部错误
+          schema:
+            additionalProperties: true
+            type: object
+      summary: 删除班级
+      tags:
+      - 班级管理
+    put:
+      consumes:
+      - application/json
+      description: 编辑班级信息
+      parameters:
+      - description: 班级ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: 班级信息
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/service.ClassEditRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 编辑成功
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: 请求参数错误
+          schema:
+            additionalProperties: true
+            type: object
+        "404":
+          description: 班级不存在
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: 服务器内部错误
+          schema:
+            additionalProperties: true
+            type: object
+      summary: 编辑班级
+      tags:
+      - 班级管理
+  /class/add:
+    post:
+      consumes:
+      - application/json
+      description: 添加一个新班级
+      parameters:
+      - description: 班级信息
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/service.ClassAddRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 添加成功
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: 请求参数错误
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: 服务器内部错误
+          schema:
+            additionalProperties: true
+            type: object
+      summary: 添加班级
+      tags:
+      - 班级管理
+  /class/list:
+    get:
+      description: 获取分页的班级列表
+      parameters:
+      - default: 1
+        description: 页码
+        in: query
+        name: page
+        type: integer
+      - default: 10
+        description: 每页数量
+        in: query
+        name: page_size
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 成功获取班级列表
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: 服务器内部错误
+          schema:
+            additionalProperties: true
+            type: object
+      summary: 获取班级列表
+      tags:
+      - 班级管理
+  /user/login:
+    post:
+      consumes:
+      - application/json
+      description: 用户登录系统
+      parameters:
+      - description: 登录信息
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/service.UserLoginRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 登录成功
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: 请求参数错误
+          schema:
+            additionalProperties: true
+            type: object
+        "401":
+          description: 认证失败
+          schema:
+            additionalProperties: true
+            type: object
+      summary: 用户登录
+      tags:
+      - 用户管理
+  /user/register:
+    post:
+      consumes:
+      - application/json
+      description: 注册新用户
+      parameters:
+      - description: 注册信息
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/service.UserRegisterRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 注册成功
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: 请求参数错误
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: 服务器内部错误
+          schema:
+            additionalProperties: true
+            type: object
+      summary: 用户注册
+      tags:
+      - 用户管理
+schemes:
+- http
+swagger: "2.0"
