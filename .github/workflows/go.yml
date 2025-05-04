@@ -36,7 +36,7 @@ jobs:
         run: gofmt -l .
 
       - name: Build project
-        run: go build ./...
+        run: go build cmd/ai-course/main.go
 
       - name: Run tests
         run: go test -v ./...
