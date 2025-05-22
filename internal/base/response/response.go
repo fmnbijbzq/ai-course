@@ -45,22 +45,42 @@ func NewHandler(c *gin.Context) *Handler {
 
 // Success 成功响应
 func (r *Handler) Success(data interface{}) {
-	r.JSON(CodeSuccess, MsgSuccess, data)
+	resp := Response{
+		Code:    CodeSuccess,
+		Message: MsgSuccess,
+		Data:    data,
+	}
+	r.C.JSON(http.StatusOK, resp)
 }
 
 // SuccessWithMessage 自定义消息的成功响应
 func (r *Handler) SuccessWithMessage(message string, data interface{}) {
-	r.JSON(CodeSuccess, message, data)
+	resp := Response{
+		Code:    CodeSuccess,
+		Message: message,
+		Data:    data,
+	}
+	r.C.JSON(http.StatusOK, resp)
 }
 
 // Fail 失败响应
 func (r *Handler) Fail(code int, message string) {
-	r.JSON(code, message, nil)
+	resp := Response{
+		Code:    code,
+		Message: message,
+		Data:    nil,
+	}
+	r.C.JSON(http.StatusOK, resp)
 }
 
 // FailWithData 带数据的失败响应
 func (r *Handler) FailWithData(code int, message string, data interface{}) {
-	r.JSON(code, message, data)
+	resp := Response{
+		Code:    code,
+		Message: message,
+		Data:    data,
+	}
+	r.C.JSON(http.StatusOK, resp)
 }
 
 // ParamError 参数错误响应
@@ -68,7 +88,12 @@ func (r *Handler) ParamError(message string) {
 	if message == "" {
 		message = MsgInvalidParam
 	}
-	r.JSON(CodeInvalidParam, message, nil)
+	resp := Response{
+		Code:    CodeInvalidParam,
+		Message: message,
+		Data:    nil,
+	}
+	r.C.JSON(http.StatusBadRequest, resp)
 }
 
 // Unauthorized 未授权响应
@@ -76,7 +101,12 @@ func (r *Handler) Unauthorized(message string) {
 	if message == "" {
 		message = MsgUnauthorized
 	}
-	r.JSON(CodeUnauthorized, message, nil)
+	resp := Response{
+		Code:    CodeUnauthorized,
+		Message: message,
+		Data:    nil,
+	}
+	r.C.JSON(http.StatusUnauthorized, resp)
 }
 
 // Forbidden 禁止访问响应
@@ -84,7 +114,12 @@ func (r *Handler) Forbidden(message string) {
 	if message == "" {
 		message = MsgForbidden
 	}
-	r.JSON(CodeForbidden, message, nil)
+	resp := Response{
+		Code:    CodeForbidden,
+		Message: message,
+		Data:    nil,
+	}
+	r.C.JSON(http.StatusForbidden, resp)
 }
 
 // NotFound 资源不存在响应
@@ -92,7 +127,12 @@ func (r *Handler) NotFound(message string) {
 	if message == "" {
 		message = MsgNotFound
 	}
-	r.JSON(CodeNotFound, message, nil)
+	resp := Response{
+		Code:    CodeNotFound,
+		Message: message,
+		Data:    nil,
+	}
+	r.C.JSON(http.StatusNotFound, resp)
 }
 
 // ServerError 服务器错误响应
@@ -100,23 +140,30 @@ func (r *Handler) ServerError(message string) {
 	if message == "" {
 		message = MsgServerError
 	}
-	r.JSON(CodeServerError, message, nil)
+	resp := Response{
+		Code:    CodeServerError,
+		Message: message,
+		Data:    nil,
+	}
+	r.C.JSON(http.StatusInternalServerError, resp)
 }
 
 // JSON 发送JSON响应
 func (r *Handler) JSON(code int, message string, data interface{}) {
-	r.C.JSON(http.StatusOK, Response{
+	resp := Response{
 		Code:    code,
 		Message: message,
 		Data:    data,
-	})
+	}
+	r.C.JSON(http.StatusOK, resp)
 }
 
 // CustomJSON 自定义HTTP状态码的JSON响应
 func (r *Handler) CustomJSON(httpStatus int, code int, message string, data interface{}) {
-	r.C.JSON(httpStatus, Response{
+	resp := Response{
 		Code:    code,
 		Message: message,
 		Data:    data,
-	})
+	}
+	r.C.JSON(httpStatus, resp)
 }

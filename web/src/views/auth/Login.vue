@@ -100,7 +100,7 @@ const handleSubmit = async () => {
           router.push(redirect).catch((err) => {
             console.error('Navigation error:', err)
             // 如果跳转失败，默认跳转到仪表盘
-            router.push('/app/dashboard')
+        router.push('/app/dashboard')
           })
         })
       } catch (error: any) {

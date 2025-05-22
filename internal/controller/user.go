@@ -16,9 +16,18 @@ type UserController struct {
 }
 
 // NewUserController 创建用户控制器
-func NewUserController() *UserController {
+func NewUserController(userService service.UserService) *UserController {
 	return &UserController{
-		userService: service.NewUserService(),
+		userService: userService,
+	}
+}
+
+// RegisterRoutes 注册路由
+func (c *UserController) RegisterRoutes(r *gin.Engine) {
+	userGroup := r.Group("/api/user")
+	{
+		userGroup.POST("/register", c.Register)
+		userGroup.POST("/login", c.Login)
 	}
 }
 
@@ -35,7 +44,7 @@ func NewUserController() *UserController {
 // @Router /user/register [post]
 func (c *UserController) Register(ctx *gin.Context) {
 	c.InitHandler(ctx)
-	var req service.UserRegisterRequest
+	var req service.CreateUserDTO
 	if err := ctx.ShouldBindJSON(&req); err != nil {
 		logger.Logger.Warn("Invalid register request",
 			zap.Error(err),
@@ -44,7 +53,7 @@ func (c *UserController) Register(ctx *gin.Context) {
 		return
 	}
 
-	user, err := c.userService.Register(&req)
+	err := c.userService.Register(ctx, &req)
 	if err != nil {
 		logger.Logger.Error("Failed to register user",
 			zap.Error(err),
@@ -58,9 +67,7 @@ func (c *UserController) Register(ctx *gin.Context) {
 		zap.String("student_id", req.StudentID),
 	)
 
-	c.SuccessWithMessage("注册成功", gin.H{
-		"user": user,
-	})
+	c.SuccessWithMessage("注册成功", nil)
 }
 
 // Login godoc
@@ -76,7 +83,7 @@ func (c *UserController) Register(ctx *gin.Context) {
 // @Router /user/login [post]
 func (c *UserController) Login(ctx *gin.Context) {
 	c.InitHandler(ctx)
-	var req service.UserLoginRequest
+	var req service.LoginUserDTO
 	if err := ctx.ShouldBindJSON(&req); err != nil {
 		logger.Logger.Warn("Invalid login request",
 			zap.Error(err),
@@ -85,7 +92,7 @@ func (c *UserController) Login(ctx *gin.Context) {
 		return
 	}
 
-	user, err := c.userService.Login(&req)
+	resp, err := c.userService.Login(ctx, &req)
 	if err != nil {
 		logger.Logger.Error("Failed to login",
 			zap.Error(err),
@@ -99,7 +106,5 @@ func (c *UserController) Login(ctx *gin.Context) {
 		zap.String("student_id", req.StudentID),
 	)
 
-	c.SuccessWithMessage("登录成功", gin.H{
-		"user": user,
-	})
+	c.SuccessWithMessage("登录成功", resp)
 }

@@ -3,19 +3,18 @@ package repository
 import (
 	"ai-course/internal/logger"
 	"ai-course/internal/model"
+	"context"
 
 	"go.uber.org/zap"
 )
 
 // AutoMigrate 自动迁移数据库表结构
-func AutoMigrate() error {
+func AutoMigrate(db DB) error {
 	logger.Logger.Info("Starting database migration...")
 
-	// 在这里添加需要迁移的模型
-	err := DB.AutoMigrate(
+	err := db.WithContext(context.Background()).AutoMigrate(
 		&model.User{},
 		&model.Class{},
-		// 添加其他模型...
 	)
 
 	if err != nil {

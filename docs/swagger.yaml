@@ -1,22 +1,49 @@
 basePath: /
 definitions:
-  service.ClassAddRequest:
+  response.Response:
     properties:
-      class_name:
-        maxLength: 50
-        minLength: 2
+      code:
+        description: 业务状态码
+        type: integer
+      data:
+        description: 响应数据
+      message:
+        description: 响应信息
         type: string
-    required:
-    - class_name
     type: object
-  service.ClassEditRequest:
+  service.AddClassRequest:
     properties:
-      class_name:
-        maxLength: 50
-        minLength: 2
+      description:
+        description: 班级描述
         type: string
+      name:
+        description: 班级名称
+        type: string
+      teacher_id:
+        description: 教师ID
+        type: integer
     required:
-    - class_name
+    - name
+    - teacher_id
+    type: object
+  service.EditClassRequest:
+    properties:
+      description:
+        description: 班级描述
+        type: string
+      id:
+        description: 班级ID
+        type: integer
+      name:
+        description: 班级名称
+        type: string
+      teacher_id:
+        description: 教师ID
+        type: integer
+    required:
+    - id
+    - name
+    - teacher_id
     type: object
   service.UserLoginRequest:
     properties:
@@ -60,76 +87,57 @@ info:
 paths:
   /class/{id}:
     delete:
-      description: 删除指定班级
+      description: 删除现有班级
       parameters:
       - description: 班级ID
         in: path
         name: id
         required: true
         type: integer
+      produces:
+      - application/json
       responses:
         "200":
           description: 删除成功
           schema:
-            additionalProperties: true
-            type: object
+            $ref: '#/definitions/response.Response'
         "400":
           description: 请求参数错误
           schema:
-            additionalProperties: true
-            type: object
-        "404":
-          description: 班级不存在
-          schema:
-            additionalProperties: true
-            type: object
+            $ref: '#/definitions/response.Response'
         "500":
           description: 服务器内部错误
           schema:
-            additionalProperties: true
-            type: object
+            $ref: '#/definitions/response.Response'
       summary: 删除班级
       tags:
       - 班级管理
     put:
       consumes:
       - application/json
-      description: 编辑班级信息
+      description: 编辑现有班级
       parameters:
-      - description: 班级ID
-        in: path
-        name: id
-        required: true
-        type: integer
       - description: 班级信息
         in: body
         name: request
         required: true
         schema:
-          $ref: '#/definitions/service.ClassEditRequest'
+          $ref: '#/definitions/service.EditClassRequest'
       produces:
       - application/json
       responses:
         "200":
           description: 编辑成功
           schema:
-            additionalProperties: true
-            type: object
+            $ref: '#/definitions/response.Response'
         "400":
           description: 请求参数错误
           schema:
-            additionalProperties: true
-            type: object
-        "404":
-          description: 班级不存在
-          schema:
-            additionalProperties: true
-            type: object
+            $ref: '#/definitions/response.Response'
         "500":
           description: 服务器内部错误
           schema:
-            additionalProperties: true
-            type: object
+            $ref: '#/definitions/response.Response'
       summary: 编辑班级
       tags:
       - 班级管理
@@ -137,62 +145,61 @@ paths:
     post:
       consumes:
       - application/json
-      description: 添加一个新班级
+      description: 添加新班级
       parameters:
       - description: 班级信息
         in: body
         name: request
         required: true
         schema:
-          $ref: '#/definitions/service.ClassAddRequest'
+          $ref: '#/definitions/service.AddClassRequest'
       produces:
       - application/json
       responses:
         "200":
           description: 添加成功
           schema:
-            additionalProperties: true
-            type: object
+            $ref: '#/definitions/response.Response'
         "400":
           description: 请求参数错误
           schema:
-            additionalProperties: true
-            type: object
+            $ref: '#/definitions/response.Response'
         "500":
           description: 服务器内部错误
           schema:
-            additionalProperties: true
-            type: object
+            $ref: '#/definitions/response.Response'
       summary: 添加班级
       tags:
       - 班级管理
   /class/list:
     get:
-      description: 获取分页的班级列表
+      description: 分页获取班级列表
       parameters:
-      - default: 1
-        description: 页码
+      - description: 页码
         in: query
         name: page
+        required: true
         type: integer
-      - default: 10
-        description: 每页数量
+      - description: 每页数量
         in: query
         name: page_size
+        required: true
         type: integer
       produces:
       - application/json
       responses:
         "200":
-          description: 成功获取班级列表
+          description: 获取成功
           schema:
-            additionalProperties: true
-            type: object
+            $ref: '#/definitions/response.Response'
+        "400":
+          description: 请求参数错误
+          schema:
+            $ref: '#/definitions/response.Response'
         "500":
           description: 服务器内部错误
           schema:
-            additionalProperties: true
-            type: object
+            $ref: '#/definitions/response.Response'
       summary: 获取班级列表
       tags:
       - 班级管理
@@ -214,18 +221,15 @@ paths:
         "200":
           description: 登录成功
           schema:
-            additionalProperties: true
-            type: object
+            $ref: '#/definitions/response.Response'
         "400":
           description: 请求参数错误
           schema:
-            additionalProperties: true
-            type: object
+            $ref: '#/definitions/response.Response'
         "401":
           description: 认证失败
           schema:
-            additionalProperties: true
-            type: object
+            $ref: '#/definitions/response.Response'
       summary: 用户登录
       tags:
       - 用户管理
@@ -247,18 +251,15 @@ paths:
         "200":
           description: 注册成功
           schema:
-            additionalProperties: true
-            type: object
+            $ref: '#/definitions/response.Response'
         "400":
           description: 请求参数错误
           schema:
-            additionalProperties: true
-            type: object
+            $ref: '#/definitions/response.Response'
         "500":
           description: 服务器内部错误
           schema:
-            additionalProperties: true
-            type: object
+            $ref: '#/definitions/response.Response'
       summary: 用户注册
       tags:
       - 用户管理

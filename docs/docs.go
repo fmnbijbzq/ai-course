@@ -26,7 +26,7 @@ const docTemplate = `{
     "paths": {
         "/class/add": {
             "post": {
-                "description": "添加一个新班级",
+                "description": "添加新班级",
                 "consumes": [
                     "application/json"
                 ],
@@ -44,7 +44,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/service.ClassAddRequest"
+                            "$ref": "#/definitions/service.AddClassRequest"
                         }
                     }
                 ],
@@ -52,22 +52,19 @@ const docTemplate = `{
                     "200": {
                         "description": "添加成功",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": true
+                            "$ref": "#/definitions/response.Response"
                         }
                     },
                     "400": {
                         "description": "请求参数错误",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": true
+                            "$ref": "#/definitions/response.Response"
                         }
                     },
                     "500": {
                         "description": "服务器内部错误",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": true
+                            "$ref": "#/definitions/response.Response"
                         }
                     }
                 }
@@ -75,7 +72,7 @@ const docTemplate = `{
         },
         "/class/list": {
             "get": {
-                "description": "获取分页的班级列表",
+                "description": "分页获取班级列表",
                 "produces": [
                     "application/json"
                 ],
@@ -86,32 +83,36 @@ const docTemplate = `{
                 "parameters": [
                     {
                         "type": "integer",
-                        "default": 1,
                         "description": "页码",
                         "name": "page",
-                        "in": "query"
+                        "in": "query",
+                        "required": true
                     },
                     {
                         "type": "integer",
-                        "default": 10,
                         "description": "每页数量",
                         "name": "page_size",
-                        "in": "query"
+                        "in": "query",
+                        "required": true
                     }
                 ],
                 "responses": {
                     "200": {
-                        "description": "成功获取班级列表",
+                        "description": "获取成功",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": true
+                            "$ref": "#/definitions/response.Response"
+                        }
+                    },
+                    "400": {
+                        "description": "请求参数错误",
+                        "schema": {
+                            "$ref": "#/definitions/response.Response"
                         }
                     },
                     "500": {
                         "description": "服务器内部错误",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": true
+                            "$ref": "#/definitions/response.Response"
                         }
                     }
                 }
@@ -119,7 +120,7 @@ const docTemplate = `{
         },
         "/class/{id}": {
             "put": {
-                "description": "编辑班级信息",
+                "description": "编辑现有班级",
                 "consumes": [
                     "application/json"
                 ],
@@ -132,19 +133,12 @@ const docTemplate = `{
                 "summary": "编辑班级",
                 "parameters": [
                     {
-                        "type": "integer",
-                        "description": "班级ID",
-                        "name": "id",
-                        "in": "path",
-                        "required": true
-                    },
-                    {
                         "description": "班级信息",
                         "name": "request",
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/service.ClassEditRequest"
+                            "$ref": "#/definitions/service.EditClassRequest"
                         }
                     }
                 ],
@@ -152,35 +146,28 @@ const docTemplate = `{
                     "200": {
                         "description": "编辑成功",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": true
+                            "$ref": "#/definitions/response.Response"
                         }
                     },
                     "400": {
                         "description": "请求参数错误",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": true
-                        }
-                    },
-                    "404": {
-                        "description": "班级不存在",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": true
+                            "$ref": "#/definitions/response.Response"
                         }
                     },
                     "500": {
                         "description": "服务器内部错误",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": true
+                            "$ref": "#/definitions/response.Response"
                         }
                     }
                 }
             },
             "delete": {
-                "description": "删除指定班级",
+                "description": "删除现有班级",
+                "produces": [
+                    "application/json"
+                ],
                 "tags": [
                     "班级管理"
                 ],
@@ -198,29 +185,19 @@ const docTemplate = `{
                     "200": {
                         "description": "删除成功",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": true
+                            "$ref": "#/definitions/response.Response"
                         }
                     },
                     "400": {
                         "description": "请求参数错误",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": true
-                        }
-                    },
-                    "404": {
-                        "description": "班级不存在",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": true
+                            "$ref": "#/definitions/response.Response"
                         }
                     },
                     "500": {
                         "description": "服务器内部错误",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": true
+                            "$ref": "#/definitions/response.Response"
                         }
                     }
                 }
@@ -254,22 +231,19 @@ const docTemplate = `{
                     "200": {
                         "description": "登录成功",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": true
+                            "$ref": "#/definitions/response.Response"
                         }
                     },
                     "400": {
                         "description": "请求参数错误",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": true
+                            "$ref": "#/definitions/response.Response"
                         }
                     },
                     "401": {
                         "description": "认证失败",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": true
+                            "$ref": "#/definitions/response.Response"
                         }
                     }
                 }
@@ -303,22 +277,19 @@ const docTemplate = `{
                     "200": {
                         "description": "注册成功",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": true
+                            "$ref": "#/definitions/response.Response"
                         }
                     },
                     "400": {
                         "description": "请求参数错误",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": true
+                            "$ref": "#/definitions/response.Response"
                         }
                     },
                     "500": {
                         "description": "服务器内部错误",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": true
+                            "$ref": "#/definitions/response.Response"
                         }
                     }
                 }
@@ -326,29 +297,66 @@ const docTemplate = `{
         }
     },
     "definitions": {
-        "service.ClassAddRequest": {
+        "response.Response": {
             "type": "object",
-            "required": [
-                "class_name"
-            ],
             "properties": {
-                "class_name": {
-                    "type": "string",
-                    "maxLength": 50,
-                    "minLength": 2
+                "code": {
+                    "description": "业务状态码",
+                    "type": "integer"
+                },
+                "data": {
+                    "description": "响应数据"
+                },
+                "message": {
+                    "description": "响应信息",
+                    "type": "string"
                 }
             }
         },
-        "service.ClassEditRequest": {
+        "service.AddClassRequest": {
             "type": "object",
             "required": [
-                "class_name"
+                "name",
+                "teacher_id"
             ],
             "properties": {
-                "class_name": {
-                    "type": "string",
-                    "maxLength": 50,
-                    "minLength": 2
+                "description": {
+                    "description": "班级描述",
+                    "type": "string"
+                },
+                "name": {
+                    "description": "班级名称",
+                    "type": "string"
+                },
+                "teacher_id": {
+                    "description": "教师ID",
+                    "type": "integer"
+                }
+            }
+        },
+        "service.EditClassRequest": {
+            "type": "object",
+            "required": [
+                "id",
+                "name",
+                "teacher_id"
+            ],
+            "properties": {
+                "description": {
+                    "description": "班级描述",
+                    "type": "string"
+                },
+                "id": {
+                    "description": "班级ID",
+                    "type": "integer"
+                },
+                "name": {
+                    "description": "班级名称",
+                    "type": "string"
+                },
+                "teacher_id": {
+                    "description": "教师ID",
+                    "type": "integer"
                 }
             }
         },

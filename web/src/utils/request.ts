@@ -57,18 +57,48 @@ service.interceptors.response.use(
     // 检查响应数据结构
     const data = response.data
     if (!data) {
+      console.error('响应数据为空:', data)
       throw new Error('响应数据为空')
+    }
+
+    // 检查业务状态码
+    if (data.code !== 200) {
+      console.error('业务状态码错误:', data)
+      throw new Error(data.message || '请求失败')
     }
 
     // 如果是登录或注册接口
     if (response.config.url?.includes('/user/login') || response.config.url?.includes('/user/register')) {
+      console.log('登录/注册接口响应:', data)
+      const responseData = data.data
+      console.log('提取的响应数据:', responseData)
+      
       // 确保返回的数据包含必要的字段
-      if (!data.token || !data.user) {
-        throw new Error('响应数据结构不正确')
+      if (!responseData) {
+        console.error('响应数据为空:', data)
+        throw new Error('响应数据结构不正确: data 为空')
       }
+      if (!responseData.token) {
+        console.error('缺少 token:', responseData)
+        throw new Error('响应数据结构不正确: 缺少 token')
+      }
+      if (!responseData.user) {
+        console.error('缺少 user:', responseData)
+        throw new Error('响应数据结构不正确: 缺少 user')
+      }
+
+      // 返回符合前端接口的数据结构
+      const result = {
+        message: data.message,
+        user: responseData.user,
+        token: responseData.token
+      }
+      console.log('最终返回的数据:', result)
+      return result
     }
 
-    return data
+    // 对于其他接口，直接返回数据部分
+    return data.data
   },
   (error) => {
     console.error('Response Error:', error)
@@ -88,7 +118,8 @@ service.interceptors.response.use(
       }, 1500)
     } else {
       // 处理其他错误
-      errorMessage = error.response?.data?.error || error.response?.data?.message || error.message || '请求失败'
+      const response = error.response?.data
+      errorMessage = response?.message || error.message || '请求失败'
     }
 
     // 显示错误消息（只显示一次）

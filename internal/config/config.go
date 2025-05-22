@@ -8,12 +8,20 @@ import (
 	"github.com/spf13/viper"
 )
 
+// Config 应用配置
 type Config struct {
 	Server ServerConfig `mapstructure:"server"`
 	Logger LoggerConfig `mapstructure:"logger"`
 	MySQL  MySQLConfig  `mapstructure:"mysql"`
 }
 
+// ServerConfig 服务器配置
+type ServerConfig struct {
+	Port int    `mapstructure:"port"`
+	Mode string `mapstructure:"mode"`
+}
+
+// LoggerConfig 日志配置
 type LoggerConfig struct {
 	Level      string `mapstructure:"level"`
 	Filename   string `mapstructure:"filename"`
@@ -23,11 +31,7 @@ type LoggerConfig struct {
 	Compress   bool   `mapstructure:"compress"`
 }
 
-type ServerConfig struct {
-	Port int    `mapstructure:"port"`
-	Mode string `mapstructure:"mode"`
-}
-
+// MySQLConfig MySQL数据库配置
 type MySQLConfig struct {
 	Host            string `mapstructure:"host"`
 	Port            int    `mapstructure:"port"`
@@ -42,31 +46,40 @@ type MySQLConfig struct {
 	ConnMaxLifetime int    `mapstructure:"conn_max_lifetime"`
 }
 
-var GlobalConfig Config
+var GlobalConfig *Config
 
-// InitConfig 初始化配置
-func InitConfig() {
+// LoadConfig 加载配置
+func LoadConfig() *Config {
+	if GlobalConfig != nil {
+		return GlobalConfig
+	}
+
 	viper.SetConfigName("config")
 	viper.SetConfigType("yaml")
 	// 添加多个配置文件搜索路径
-	viper.AddConfigPath("./config")     // 当前目录
+	viper.AddConfigPath(".")            // 当前目录
+	viper.AddConfigPath("./config")     // 当前目录的 config
+	viper.AddConfigPath("../config")    // 上级目录的 config
 	viper.AddConfigPath("../../config") // 上上级目录的 config
 
 	if err := viper.ReadInConfig(); err != nil {
 		log.Fatalf("Error reading config file: %s", err)
 	}
 
-	if err := viper.Unmarshal(&GlobalConfig); err != nil {
+	GlobalConfig = &Config{}
+	if err := viper.Unmarshal(GlobalConfig); err != nil {
 		log.Fatalf("Error unmarshaling config: %s", err)
 	}
 
 	viper.WatchConfig()
 	viper.OnConfigChange(func(e fsnotify.Event) {
 		log.Printf("Config file changed: %s", e.String())
-		if err := viper.Unmarshal(&GlobalConfig); err != nil {
+		if err := viper.Unmarshal(GlobalConfig); err != nil {
 			log.Printf("Error unmarshaling config: %s", err)
 		}
 	})
+
+	return GlobalConfig
 }
 
 // GetMySQLDSN 获取MySQL连接字符串

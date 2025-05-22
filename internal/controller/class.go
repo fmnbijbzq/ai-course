@@ -17,9 +17,9 @@ type ClassController struct {
 }
 
 // NewClassController 创建班级控制器
-func NewClassController() *ClassController {
+func NewClassController(classService service.ClassService) *ClassController {
 	return &ClassController{
-		classService: service.NewClassService(),
+		classService: classService,
 	}
 }
 
@@ -36,7 +36,7 @@ func NewClassController() *ClassController {
 // @Router /class/add [post]
 func (c *ClassController) Add(ctx *gin.Context) {
 	c.InitHandler(ctx)
-	var req service.AddClassRequest
+	var req service.CreateClassDTO
 	if err := ctx.ShouldBindJSON(&req); err != nil {
 		logger.Logger.Warn("Invalid add class request",
 			zap.Error(err),
@@ -45,7 +45,7 @@ func (c *ClassController) Add(ctx *gin.Context) {
 		return
 	}
 
-	class, err := c.classService.Add(&req)
+	err := c.classService.Create(ctx, &req)
 	if err != nil {
 		logger.Logger.Error("Failed to add class",
 			zap.Error(err),
@@ -54,9 +54,7 @@ func (c *ClassController) Add(ctx *gin.Context) {
 		return
 	}
 
-	c.SuccessWithMessage("添加班级成功", gin.H{
-		"class": class,
-	})
+	c.SuccessWithMessage("添加班级成功", nil)
 }
 
 // Edit godoc
@@ -72,7 +70,7 @@ func (c *ClassController) Add(ctx *gin.Context) {
 // @Router /class/{id} [put]
 func (c *ClassController) Edit(ctx *gin.Context) {
 	c.InitHandler(ctx)
-	var req service.EditClassRequest
+	var req service.UpdateClassDTO
 	if err := ctx.ShouldBindJSON(&req); err != nil {
 		logger.Logger.Warn("Invalid edit class request",
 			zap.Error(err),
@@ -81,7 +79,7 @@ func (c *ClassController) Edit(ctx *gin.Context) {
 		return
 	}
 
-	class, err := c.classService.Edit(&req)
+	err := c.classService.Update(ctx, &req)
 	if err != nil {
 		logger.Logger.Error("Failed to edit class",
 			zap.Error(err),
@@ -90,9 +88,7 @@ func (c *ClassController) Edit(ctx *gin.Context) {
 		return
 	}
 
-	c.SuccessWithMessage("编辑班级成功", gin.H{
-		"class": class,
-	})
+	c.SuccessWithMessage("编辑班级成功", nil)
 }
 
 // Delete godoc
@@ -114,7 +110,7 @@ func (c *ClassController) Delete(ctx *gin.Context) {
 		return
 	}
 
-	if err := c.classService.Delete(uint(id)); err != nil {
+	if err := c.classService.Delete(ctx, uint(id)); err != nil {
 		logger.Logger.Error("Failed to delete class",
 			zap.Error(err),
 			zap.String("id", idStr),
@@ -132,14 +128,14 @@ func (c *ClassController) Delete(ctx *gin.Context) {
 // @Tags 班级管理
 // @Produce json
 // @Param page query int true "页码"
-// @Param page_size query int true "每页数量"
+// @Param page_size query int false "每页数量(默认20)"
 // @Success 200 {object} response.Response "获取成功"
 // @Failure 400 {object} response.Response "请求参数错误"
 // @Failure 500 {object} response.Response "服务器内部错误"
 // @Router /class/list [get]
 func (c *ClassController) List(ctx *gin.Context) {
 	c.InitHandler(ctx)
-	var req service.ListClassRequest
+	var req service.ClassListRequest
 	if err := ctx.ShouldBindQuery(&req); err != nil {
 		logger.Logger.Warn("Invalid list class request",
 			zap.Error(err),
@@ -148,7 +144,12 @@ func (c *ClassController) List(ctx *gin.Context) {
 		return
 	}
 
-	classes, err := c.classService.List(req.Page, req.PageSize)
+	// 设置默认分页大小
+	if req.PageSize == 0 {
+		req.PageSize = 20
+	}
+
+	response, err := c.classService.List(ctx, &req)
 	if err != nil {
 		logger.Logger.Error("Failed to get class list",
 			zap.Error(err),
@@ -157,7 +158,5 @@ func (c *ClassController) List(ctx *gin.Context) {
 		return
 	}
 
-	c.Success(gin.H{
-		"classes": classes,
-	})
+	c.Success(response)
 }
