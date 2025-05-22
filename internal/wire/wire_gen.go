@@ -25,7 +25,9 @@ func InitializeApplication() (*app.Application, error) {
 	cache := repository.NewNoOpCache()
 	userRepository := repository.NewUserRepository(repositoryDB, cache)
 	userService := service.NewUserService(userRepository)
-	application := app.NewApplication(engine, configConfig, userService)
+	classRepository := repository.NewClassRepository(repositoryDB, cache)
+	classService := service.NewClassService(classRepository)
+	application := app.NewApplication(engine, configConfig, userService, classService)
 	return application, nil
 }
 
@@ -36,4 +38,13 @@ func InitializeUserService(db *gorm.DB) (service.UserService, error) {
 	userRepository := repository.NewUserRepository(repositoryDB, cache)
 	userService := service.NewUserService(userRepository)
 	return userService, nil
+}
+
+// InitializeClassService 初始化班级服务
+func InitializeClassService(db *gorm.DB) (service.ClassService, error) {
+	repositoryDB := repository.NewGormDB(db)
+	cache := repository.NewNoOpCache()
+	classRepository := repository.NewClassRepository(repositoryDB, cache)
+	classService := service.NewClassService(classRepository)
+	return classService, nil
 }

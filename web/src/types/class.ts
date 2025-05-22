@@ -1,27 +1,45 @@
 export interface Class {
   id: number
-  class_name: string
-  created_at: string
-  updated_at: string
+  code: string
+  name: string
+  description: string
+  teacher_id: number
 }
 
 export interface ClassAddRequest {
-  class_name: string
+  code: string
+  name: string
+  description?: string
+  teacher_id: number
 }
 
 export interface ClassEditRequest {
-  class_name: string
+  id: number
+  code: string
+  name: string
+  description?: string
+  teacher_id: number
 }
 
-export interface ClassResponse {
+export interface ApiResponse<T> {
+  code: number
   message: string
-  data: Class
+  data: T
+}
+
+export interface PaginationData {
+  list: Class[]
+  total: number
 }
 
 export interface ClassListResponse {
+  code: number
   message: string
-  data: {
-    total: number
-    list: Class[]
-  }
+  data: PaginationData
+}
+
+export interface ClassResponse {
+  code: number
+  message: string
+  data: Class
 }

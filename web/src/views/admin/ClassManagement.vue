@@ -7,9 +7,10 @@
 
     <el-table :data="classList" border style="width: 100%">
       <el-table-column prop="id" label="ID" width="80" />
-      <el-table-column prop="class_name" label="班级名称" />
-      <el-table-column prop="created_at" label="创建时间" width="180" />
-      <el-table-column prop="updated_at" label="更新时间" width="180" />
+      <el-table-column prop="code" label="班级代码" width="120" />
+      <el-table-column prop="name" label="班级名称" />
+      <el-table-column prop="description" label="班级描述" />
+      <el-table-column prop="teacher_id" label="教师ID" width="100" />
       <el-table-column label="操作" width="180">
         <template #default="scope">
           <el-button size="small" @click="handleEdit(scope.row)">编辑</el-button>
@@ -34,8 +35,17 @@
       width="30%"
     >
       <el-form :model="form" :rules="rules" ref="formRef" label-width="100px">
-        <el-form-item label="班级名称" prop="class_name">
-          <el-input v-model="form.class_name" placeholder="请输入班级名称" />
+        <el-form-item label="班级代码" prop="code">
+          <el-input v-model="form.code" placeholder="请输入班级代码" />
+        </el-form-item>
+        <el-form-item label="班级名称" prop="name">
+          <el-input v-model="form.name" placeholder="请输入班级名称" />
+        </el-form-item>
+        <el-form-item label="班级描述" prop="description">
+          <el-input v-model="form.description" type="textarea" placeholder="请输入班级描述" />
+        </el-form-item>
+        <el-form-item label="教师ID" prop="teacher_id">
+          <el-input v-model.number="form.teacher_id" type="number" placeholder="请输入教师ID" />
         </el-form-item>
       </el-form>
 
@@ -60,11 +70,12 @@ import {
 import type {
   Class,
   ClassAddRequest,
-  ClassEditRequest
+  ClassEditRequest,
+  PaginationData
 } from '@/types/class'
 
 const classList = ref<Class[]>([])
-const total = ref(0)
+const total = ref<number>(0)
 const pagination = reactive({
   page: 1,
   page_size: 10
@@ -74,14 +85,25 @@ const dialogTitle = ref('')
 const formRef = ref<FormInstance>()
 const currentId = ref<number | null>(null)
 
-const form = reactive<ClassAddRequest | ClassEditRequest>({
-  class_name: ''
+const form = reactive<ClassAddRequest>({
+  code: '',
+  name: '',
+  description: '',
+  teacher_id: 0
 })
 
 const rules = {
-  class_name: [
+  code: [
+    { required: true, message: '请输入班级代码', trigger: 'blur' },
+    { min: 2, max: 20, message: '长度在 2 到 20 个字符', trigger: 'blur' }
+  ],
+  name: [
     { required: true, message: '请输入班级名称', trigger: 'blur' },
     { min: 2, max: 50, message: '长度在 2 到 50 个字符', trigger: 'blur' }
+  ],
+  teacher_id: [
+    { required: true, message: '请输入教师ID', trigger: 'blur' },
+    { type: 'number', min: 1, message: '教师ID必须大于0', trigger: 'blur' }
   ]
 }
 
@@ -91,16 +113,20 @@ onMounted(() => {
 
 const fetchClassList = async () => {
   try {
-    const res = await getClassList(pagination)
-    classList.value = res.data.list
-    total.value = res.data.total
-  } catch (error) {
-    ElMessage.error('获取班级列表失败')
+    const data = await getClassList(pagination)
+    if (data) {
+      classList.value = data.list
+      total.value = data.total
+    } else {
+      ElMessage.error('获取班级列表失败：数据格式错误')
+    }
+  } catch (error: any) {
+    console.error('获取班级列表失败:', error)
+    ElMessage.error(error.message || '获取班级列表失败')
   }
 }
 
 const handleSizeChange = () => {
-  // 当每页显示数量变化时，重置页码为1并重新获取数据
   pagination.page = 1
   fetchClassList()
 }
@@ -108,14 +134,20 @@ const handleSizeChange = () => {
 const showAddDialog = () => {
   dialogTitle.value = '添加班级'
   currentId.value = null
-  form.class_name = ''
+  form.code = ''
+  form.name = ''
+  form.description = ''
+  form.teacher_id = 0
   dialogVisible.value = true
 }
 
 const handleEdit = (row: Class) => {
   dialogTitle.value = '编辑班级'
   currentId.value = row.id
-  form.class_name = row.class_name
+  form.code = row.code
+  form.name = row.name
+  form.description = row.description
+  form.teacher_id = row.teacher_id
   dialogVisible.value = true
 }
 
@@ -127,7 +159,6 @@ const handleDelete = (row: Class) => {
   }).then(async () => {
     try {
       await deleteClass(row.id)
-      ElMessage.success('删除成功')
       fetchClassList()
     } catch (error) {
       ElMessage.error('删除失败')
@@ -138,40 +169,45 @@ const handleDelete = (row: Class) => {
 const submitForm = async () => {
   if (!formRef.value) return
 
-  await formRef.value.validate(async (valid) => {
-    if (valid) {
-      try {
-        if (currentId.value) {
-          await editClass(currentId.value, form as ClassEditRequest)
-          ElMessage.success('更新成功')
-        } else {
-          await addClass(form as ClassAddRequest)
-          ElMessage.success('添加成功')
-        }
-        dialogVisible.value = false
-        fetchClassList()
-      } catch (error) {
-        ElMessage.error('操作失败')
-      }
+  try {
+    await formRef.value.validate()
+    
+    if (currentId.value === null) {
+      // 添加班级
+      await addClass(form)
+    } else {
+      // 编辑班级
+      await editClass(currentId.value, {
+        id: currentId.value,
+        code: form.code,
+        name: form.name,
+        description: form.description,
+        teacher_id: form.teacher_id
+      })
     }
-  })
+
+    dialogVisible.value = false
+    fetchClassList()
+  } catch (error) {
+    ElMessage.error('表单验证失败')
+  }
 }
 </script>
 
-<style scoped lang="scss">
+<style scoped>
 .class-management {
   padding: 20px;
+}
 
-  .header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 20px;
-  }
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+}
 
-  .el-pagination {
-    margin-top: 20px;
-    justify-content: flex-end;
-  }
+.el-pagination {
+  margin-top: 20px;
+  text-align: right;
 }
 </style>

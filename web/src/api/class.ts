@@ -1,23 +1,23 @@
 import request from '@/utils/request'
 import type { 
   ClassAddRequest, 
-  ClassEditRequest, 
-  ClassResponse, 
-  ClassListResponse 
+  ClassEditRequest,
+  Class,
+  PaginationData
 } from '@/types/class'
 
 export const addClass = (data: ClassAddRequest) => {
-  return request.post<ClassResponse>('/class/add', data)
+  return request.post<Class>('/class/add', data)
 }
 
 export const editClass = (id: number, data: ClassEditRequest) => {
-  return request.put<ClassResponse>(`/class/${id}`, data)
+  return request.put<Class>(`/class/${id}`, data)
 }
 
 export const deleteClass = (id: number) => {
-  return request.delete<{ message: string }>(`/class/${id}`)
+  return request.delete<void>(`/class/${id}`)
 }
 
 export const getClassList = (params: { page: number; page_size: number }) => {
-  return request.get<ClassListResponse>('/class/list', { params })
+  return request.get<PaginationData>('/class/list', { params })
 }

@@ -11,9 +11,10 @@ import (
 
 // Application 应用程序结构
 type Application struct {
-	Engine      *gin.Engine
-	Config      *config.Config
-	UserService service.UserService
+	Engine       *gin.Engine
+	Config       *config.Config
+	UserService  service.UserService
+	ClassService service.ClassService
 }
 
 // NewApplication 创建应用程序实例
@@ -21,11 +22,13 @@ func NewApplication(
 	engine *gin.Engine,
 	cfg *config.Config,
 	userService service.UserService,
+	classService service.ClassService,
 ) *Application {
 	return &Application{
-		Engine:      engine,
-		Config:      cfg,
-		UserService: userService,
+		Engine:       engine,
+		Config:       cfg,
+		UserService:  userService,
+		ClassService: classService,
 	}
 }
 
@@ -41,7 +44,7 @@ func NewGinEngine(cfg *config.Config) *gin.Engine {
 
 // RegisterRoutes 注册路由
 func (app *Application) RegisterRoutes() {
-	router := controller.NewRouter(app.Engine, app.UserService)
+	router := controller.NewRouter(app.Engine, app.UserService, app.ClassService)
 	router.RegisterRoutes()
 }
 

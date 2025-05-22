@@ -13,17 +13,19 @@ import (
 
 // Router 路由管理器
 type Router struct {
-	engine      *gin.Engine
-	userService service.UserService
-	baseCtrl    *controller.BaseController
+	engine       *gin.Engine
+	userService  service.UserService
+	classService service.ClassService
+	baseCtrl     *controller.BaseController
 }
 
 // NewRouter 创建路由管理器
-func NewRouter(engine *gin.Engine, userService service.UserService) *Router {
+func NewRouter(engine *gin.Engine, userService service.UserService, classService service.ClassService) *Router {
 	return &Router{
-		engine:      engine,
-		userService: userService,
-		baseCtrl:    &controller.BaseController{},
+		engine:       engine,
+		userService:  userService,
+		classService: classService,
+		baseCtrl:     &controller.BaseController{},
 	}
 }
 
@@ -76,13 +78,13 @@ func (r *Router) RegisterRoutes() {
 		userGroup.POST("/login", userController.Login)
 	}
 
-	// TODO: 班级路由组将在实现 ClassService 后添加
-	// classController := NewClassController()
-	// classGroup := r.engine.Group("/class")
-	// {
-	// 	classGroup.POST("/add", classController.Add)
-	// 	classGroup.PUT("/:id", classController.Edit)
-	// 	classGroup.DELETE("/:id", classController.Delete)
-	// 	classGroup.GET("/list", classController.List)
-	// }
+	// 班级路由组
+	classController := NewClassController(r.classService)
+	classGroup := r.engine.Group("/class")
+	{
+		classGroup.POST("/add", classController.Add)
+		classGroup.PUT("/:id", classController.Edit)
+		classGroup.DELETE("/:id", classController.Delete)
+		classGroup.GET("/list", classController.List)
+	}
 }

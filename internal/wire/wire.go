@@ -26,9 +26,11 @@ func InitializeApplication() (*app.Application, error) {
 		repository.NewGormDB,
 		repository.NewNoOpCache,
 		repository.NewUserRepository,
+		repository.NewClassRepository,
 
 		// Service 层
 		service.NewUserService,
+		service.NewClassService,
 
 		// Gin 引擎
 		app.NewGinEngine,
@@ -46,6 +48,17 @@ func InitializeUserService(db *gorm.DB) (service.UserService, error) {
 		repository.NewNoOpCache,
 		repository.NewUserRepository,
 		service.NewUserService,
+	)
+	return nil, nil
+}
+
+// InitializeClassService 初始化班级服务
+func InitializeClassService(db *gorm.DB) (service.ClassService, error) {
+	wire.Build(
+		repository.NewGormDB,
+		repository.NewNoOpCache,
+		repository.NewClassRepository,
+		service.NewClassService,
 	)
 	return nil, nil
 }

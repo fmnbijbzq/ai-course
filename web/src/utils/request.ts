@@ -1,12 +1,24 @@
 import axios from 'axios'
-import type { AxiosInstance, InternalAxiosRequestConfig } from 'axios'
+import type { AxiosInstance, InternalAxiosRequestConfig, AxiosResponse } from 'axios'
 import { ElMessage } from 'element-plus'
 
-const service: AxiosInstance = axios.create({
+interface ApiResponse<T = any> {
+  code?: number
+  message: string
+  data: T
+}
+
+// 创建自定义的 request 实例，并添加类型
+const service = axios.create({
   baseURL: import.meta.env.VITE_API_BASE_URL,
   timeout: 10000,
   withCredentials: true
-})
+}) as AxiosInstance & {
+  get<T = any>(url: string, config?: any): Promise<T>
+  post<T = any>(url: string, data?: any, config?: any): Promise<T>
+  put<T = any>(url: string, data?: any, config?: any): Promise<T>
+  delete<T = any>(url: string, config?: any): Promise<T>
+}
 
 // 确保 service 有 post 方法
 console.log('Axios instance methods:', {
@@ -35,12 +47,6 @@ service.interceptors.request.use(
       config.headers.Authorization = `Bearer ${token}`
     }
 
-    // 调试信息
-    console.log('Request Method:', config.method)
-    console.log('Request URL:', config.url)
-    console.log('Request Data:', config.data)
-    console.log('Request Headers:', config.headers)
-
     return config
   },
   (error) => {
@@ -50,60 +56,54 @@ service.interceptors.request.use(
 )
 
 service.interceptors.response.use(
-  (response) => {
-    console.log('Response Status:', response.status)
-    console.log('Response Data:', response.data)
+  (response: AxiosResponse<ApiResponse>) => {
+    const data = response.data
     
     // 检查响应数据结构
-    const data = response.data
     if (!data) {
       console.error('响应数据为空:', data)
-      throw new Error('响应数据为空')
+      return Promise.reject(new Error('响应数据为空'))
     }
 
     // 检查业务状态码
-    if (data.code !== 200) {
+    if (data.code !== undefined && data.code !== 0) {
       console.error('业务状态码错误:', data)
-      throw new Error(data.message || '请求失败')
+      return Promise.reject(new Error(data.message || '请求失败'))
     }
 
     // 如果是登录或注册接口
     if (response.config.url?.includes('/user/login') || response.config.url?.includes('/user/register')) {
-      console.log('登录/注册接口响应:', data)
       const responseData = data.data
-      console.log('提取的响应数据:', responseData)
       
       // 确保返回的数据包含必要的字段
       if (!responseData) {
         console.error('响应数据为空:', data)
-        throw new Error('响应数据结构不正确: data 为空')
+        return Promise.reject(new Error('响应数据结构不正确: data 为空'))
       }
       if (!responseData.token) {
         console.error('缺少 token:', responseData)
-        throw new Error('响应数据结构不正确: 缺少 token')
+        return Promise.reject(new Error('响应数据结构不正确: 缺少 token'))
       }
       if (!responseData.user) {
         console.error('缺少 user:', responseData)
-        throw new Error('响应数据结构不正确: 缺少 user')
+        return Promise.reject(new Error('响应数据结构不正确: 缺少 user'))
       }
-
-      // 返回符合前端接口的数据结构
-      const result = {
-        message: data.message,
-        user: responseData.user,
-        token: responseData.token
-      }
-      console.log('最终返回的数据:', result)
-      return result
     }
 
-    // 对于其他接口，直接返回数据部分
+    // 对于修改操作，显示成功消息
+    const method = response.config.method?.toUpperCase()
+    if (method && ['POST', 'PUT', 'DELETE'].includes(method)) {
+      ElMessage({
+        type: 'success',
+        message: data.message || '操作成功'
+      })
+    }
+
+    // 只返回响应数据中的 data 字段
     return data.data
   },
   (error) => {
     console.error('Response Error:', error)
-    console.error('Error Response:', error.response)
-    console.error('Error Config:', error.config)
 
     let errorMessage = '';
 
