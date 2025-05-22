@@ -3,7 +3,7 @@ package main
 import (
 	"ai-course/docs" // 导入 swagger 文档
 	"ai-course/internal/config"
-	"ai-course/internal/handler"
+	"ai-course/internal/controller"
 	"ai-course/internal/logger"
 	"ai-course/internal/repository"
 	"ai-course/internal/server"
@@ -61,7 +61,7 @@ func main() {
 	engine := gin.New()
 
 	// 注册路由
-	handler.RegisterRoutes(engine)
+	controller.RegisterRoutes(engine)
 
 	// 添加Swagger路由
 	engine.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))

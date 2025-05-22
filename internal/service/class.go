@@ -6,20 +6,33 @@ import (
 	"errors"
 )
 
-// ClassAddRequest 添加班级请求
-type ClassAddRequest struct {
-	ClassName string `json:"class_name" binding:"required,min=2,max=50"`
+// AddClassRequest 添加班级请求
+type AddClassRequest struct {
+	Name        string `json:"name" binding:"required"`       // 班级名称
+	Description string `json:"description"`                   // 班级描述
+	TeacherID   uint   `json:"teacher_id" binding:"required"` // 教师ID
 }
 
-// ClassEditRequest 编辑班级请求
-type ClassEditRequest struct {
-	ClassName string `json:"class_name" binding:"required,min=2,max=50"`
+// EditClassRequest 编辑班级请求
+type EditClassRequest struct {
+	ID          uint   `json:"id" binding:"required"`         // 班级ID
+	Name        string `json:"name" binding:"required"`       // 班级名称
+	Description string `json:"description"`                   // 班级描述
+	TeacherID   uint   `json:"teacher_id" binding:"required"` // 教师ID
+}
+
+// ListClassRequest 获取班级列表请求
+type ListClassRequest struct {
+	Page     int `form:"page" binding:"required,min=1"`      // 页码
+	PageSize int `form:"page_size" binding:"required,min=1"` // 每页数量
 }
 
 // ClassResponse 班级响应
 type ClassResponse struct {
-	ID        uint   `json:"id"`
-	ClassName string `json:"class_name"`
+	ID          uint   `json:"id"`
+	Name        string `json:"name"`
+	Description string `json:"description"`
+	TeacherID   uint   `json:"teacher_id"`
 }
 
 // ClassListResponse 班级列表响应
@@ -30,10 +43,14 @@ type ClassListResponse struct {
 
 // ClassService 班级服务接口
 type ClassService interface {
-	Add(req *ClassAddRequest) (*ClassResponse, error)
-	Edit(id uint, req *ClassEditRequest) (*ClassResponse, error)
+	// Add 添加班级
+	Add(req *AddClassRequest) (*model.Class, error)
+	// Edit 编辑班级
+	Edit(req *EditClassRequest) (*model.Class, error)
+	// Delete 删除班级
 	Delete(id uint) error
-	List(page, pageSize int) (*ClassListResponse, error)
+	// List 获取班级列表
+	List(page, pageSize int) ([]*model.Class, error)
 	GetByID(id uint) (*ClassResponse, error)
 }
 
@@ -46,97 +63,27 @@ func NewClassService() ClassService {
 }
 
 // Add 添加班级
-func (s *classService) Add(req *ClassAddRequest) (*ClassResponse, error) {
-	// 检查班级名是否已存在
-	var existingClass model.Class
-	result := repository.DB.Where("class_name = ?", req.ClassName).First(&existingClass)
-	if result.Error == nil {
-		return nil, errors.New("class name already exists")
-	}
-
-	// 创建班级
-	class := &model.Class{
-		ClassName: req.ClassName,
-	}
-
-	if err := repository.DB.Create(class).Error; err != nil {
-		return nil, err
-	}
-
-	return &ClassResponse{
-		ID:        class.ID,
-		ClassName: class.ClassName,
-	}, nil
+func (s *classService) Add(req *AddClassRequest) (*model.Class, error) {
+	// TODO: 实现添加班级逻辑
+	return nil, nil
 }
 
 // Edit 编辑班级
-func (s *classService) Edit(id uint, req *ClassEditRequest) (*ClassResponse, error) {
-	// 检查班级是否存在
-	class := &model.Class{}
-	if err := repository.DB.First(class, id).Error; err != nil {
-		return nil, errors.New("class not found")
-	}
-
-	// 检查新名称是否与其他班级重复
-	var existingClass model.Class
-	result := repository.DB.Where("class_name = ? AND id != ?", req.ClassName, id).First(&existingClass)
-	if result.Error == nil {
-		return nil, errors.New("class name already exists")
-	}
-
-	// 更新班级
-	class.ClassName = req.ClassName
-	if err := repository.DB.Save(class).Error; err != nil {
-		return nil, err
-	}
-
-	return &ClassResponse{
-		ID:        class.ID,
-		ClassName: class.ClassName,
-	}, nil
+func (s *classService) Edit(req *EditClassRequest) (*model.Class, error) {
+	// TODO: 实现编辑班级逻辑
+	return nil, nil
 }
 
 // Delete 删除班级
 func (s *classService) Delete(id uint) error {
-	result := repository.DB.Delete(&model.Class{}, id)
-	if result.Error != nil {
-		return result.Error
-	}
-	if result.RowsAffected == 0 {
-		return errors.New("class not found")
-	}
+	// TODO: 实现删除班级逻辑
 	return nil
 }
 
 // List 获取班级列表
-func (s *classService) List(page, pageSize int) (*ClassListResponse, error) {
-	var classes []model.Class
-	var total int64
-
-	// 获取总数
-	if err := repository.DB.Model(&model.Class{}).Count(&total).Error; err != nil {
-		return nil, err
-	}
-
-	// 获取分页数据
-	offset := (page - 1) * pageSize
-	if err := repository.DB.Offset(offset).Limit(pageSize).Find(&classes).Error; err != nil {
-		return nil, err
-	}
-
-	// 转换为响应格式
-	classResponses := make([]ClassResponse, len(classes))
-	for i, class := range classes {
-		classResponses[i] = ClassResponse{
-			ID:        class.ID,
-			ClassName: class.ClassName,
-		}
-	}
-
-	return &ClassListResponse{
-		Total: total,
-		List:  classResponses,
-	}, nil
+func (s *classService) List(page, pageSize int) ([]*model.Class, error) {
+	// TODO: 实现获取班级列表逻辑
+	return nil, nil
 }
 
 // GetByID 根据ID获取班级
@@ -147,7 +94,9 @@ func (s *classService) GetByID(id uint) (*ClassResponse, error) {
 	}
 
 	return &ClassResponse{
-		ID:        class.ID,
-		ClassName: class.ClassName,
+		ID:          class.ID,
+		Name:        class.Name,
+		Description: class.Description,
+		TeacherID:   class.TeacherID,
 	}, nil
 }

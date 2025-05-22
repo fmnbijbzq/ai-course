@@ -1,20 +1,23 @@
-package handler
+package controller
 
 import (
+	"ai-course/internal/base/controller"
 	"ai-course/internal/logger"
 	"ai-course/internal/service"
-	"net/http"
 
 	"github.com/gin-gonic/gin"
 	"go.uber.org/zap"
 )
 
-type UserHandler struct {
+// UserController 用户控制器
+type UserController struct {
+	controller.BaseController
 	userService service.UserService
 }
 
-func NewUserHandler() *UserHandler {
-	return &UserHandler{
+// NewUserController 创建用户控制器
+func NewUserController() *UserController {
+	return &UserController{
 		userService: service.NewUserService(),
 	}
 }
@@ -26,31 +29,28 @@ func NewUserHandler() *UserHandler {
 // @Accept json
 // @Produce json
 // @Param request body service.UserRegisterRequest true "注册信息"
-// @Success 200 {object} map[string]interface{} "注册成功"
-// @Failure 400 {object} map[string]interface{} "请求参数错误"
-// @Failure 500 {object} map[string]interface{} "服务器内部错误"
+// @Success 200 {object} response.Response "注册成功"
+// @Failure 400 {object} response.Response "请求参数错误"
+// @Failure 500 {object} response.Response "服务器内部错误"
 // @Router /user/register [post]
-func (h *UserHandler) Register(c *gin.Context) {
+func (c *UserController) Register(ctx *gin.Context) {
+	c.InitHandler(ctx)
 	var req service.UserRegisterRequest
-	if err := c.ShouldBindJSON(&req); err != nil {
+	if err := ctx.ShouldBindJSON(&req); err != nil {
 		logger.Logger.Warn("Invalid register request",
 			zap.Error(err),
 		)
-		c.JSON(http.StatusBadRequest, gin.H{
-			"error": "Invalid request parameters",
-		})
+		c.ParamError("注册参数无效")
 		return
 	}
 
-	resp, err := h.userService.Register(&req)
+	user, err := c.userService.Register(&req)
 	if err != nil {
 		logger.Logger.Error("Failed to register user",
 			zap.Error(err),
 			zap.String("student_id", req.StudentID),
 		)
-		c.JSON(http.StatusInternalServerError, gin.H{
-			"error": err.Error(),
-		})
+		c.ServerError(err.Error())
 		return
 	}
 
@@ -58,9 +58,8 @@ func (h *UserHandler) Register(c *gin.Context) {
 		zap.String("student_id", req.StudentID),
 	)
 
-	c.JSON(http.StatusOK, gin.H{
-		"message": "Registration successful",
-		"user":    resp,
+	c.SuccessWithMessage("注册成功", gin.H{
+		"user": user,
 	})
 }
 
@@ -71,31 +70,28 @@ func (h *UserHandler) Register(c *gin.Context) {
 // @Accept json
 // @Produce json
 // @Param request body service.UserLoginRequest true "登录信息"
-// @Success 200 {object} map[string]interface{} "登录成功"
-// @Failure 400 {object} map[string]interface{} "请求参数错误"
-// @Failure 401 {object} map[string]interface{} "认证失败"
+// @Success 200 {object} response.Response "登录成功"
+// @Failure 400 {object} response.Response "请求参数错误"
+// @Failure 401 {object} response.Response "认证失败"
 // @Router /user/login [post]
-func (h *UserHandler) Login(c *gin.Context) {
+func (c *UserController) Login(ctx *gin.Context) {
+	c.InitHandler(ctx)
 	var req service.UserLoginRequest
-	if err := c.ShouldBindJSON(&req); err != nil {
+	if err := ctx.ShouldBindJSON(&req); err != nil {
 		logger.Logger.Warn("Invalid login request",
 			zap.Error(err),
 		)
-		c.JSON(http.StatusBadRequest, gin.H{
-			"error": "Invalid request parameters",
-		})
+		c.ParamError("登录参数无效")
 		return
 	}
 
-	resp, err := h.userService.Login(&req)
+	user, err := c.userService.Login(&req)
 	if err != nil {
 		logger.Logger.Error("Failed to login",
 			zap.Error(err),
 			zap.String("student_id", req.StudentID),
 		)
-		c.JSON(http.StatusUnauthorized, gin.H{
-			"error": err.Error(),
-		})
+		c.Unauthorized(err.Error())
 		return
 	}
 
@@ -103,8 +99,7 @@ func (h *UserHandler) Login(c *gin.Context) {
 		zap.String("student_id", req.StudentID),
 	)
 
-	c.JSON(http.StatusOK, gin.H{
-		"message": "Login successful",
-		"user":    resp,
+	c.SuccessWithMessage("登录成功", gin.H{
+		"user": user,
 	})
 }

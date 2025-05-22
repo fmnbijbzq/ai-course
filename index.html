@@ -1,0 +1,1387 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>在线作业系统 - 优化原型</title>
+    <style>
+        /* CSS Variables */
+        :root {
+            --primary-color: #007bff;
+            --secondary-color: #6c757d;
+            --success-color: #28a745;
+            --danger-color: #dc3545;
+            --warning-color: #ffc107;
+            --info-color: #17a2b8;
+            --light-color: #f8f9fa;
+            --dark-color: #343a40;
+            --muted-color: #6c757d;
+            --body-bg: #f0f2f5;
+            --text-color: #212529;
+            --border-color: #dee2e6;
+            --border-radius: 0.3rem;
+            --box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+            --box-shadow-lg: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
+            --font-family-sans-serif: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
+        }
+
+        /* Basic Reset & Body Styling */
+        *, *::before, *::after {
+            box-sizing: border-box;
+        }
+        body {
+            font-family: var(--font-family-sans-serif);
+            font-size: 1rem;
+            font-weight: 400;
+            line-height: 1.6;
+            color: var(--text-color);
+            background-color: var(--body-bg);
+            margin: 0;
+            padding: 0;
+        }
+
+        /* Container */
+        .container {
+            width: 90%;
+            max-width: 1200px;
+            margin: 30px auto;
+            padding: 20px;
+        }
+
+        /* Header */
+        header.main-header {
+            background-color: var(--dark-color);
+            color: var(--light-color);
+            padding: 1rem 0;
+            text-align: center;
+            margin-bottom: 20px;
+            box-shadow: var(--box-shadow);
+        }
+        header.main-header h1 {
+            margin: 0;
+            font-size: 1.75rem;
+        }
+
+        /* Main Navigation (Jump Links) */
+        .main-nav-jumplinks {
+            background-color: var(--primary-color);
+            padding: 0.75rem;
+            text-align: center;
+            border-radius: var(--border-radius);
+            margin-bottom: 25px;
+            box-shadow: var(--box-shadow);
+        }
+        .main-nav-jumplinks a {
+            color: white;
+            margin: 0 12px;
+            text-decoration: none;
+            font-weight: 500;
+            padding: 0.3rem 0.6rem;
+            border-radius: var(--border-radius);
+            transition: background-color 0.2s ease;
+        }
+        .main-nav-jumplinks a:hover {
+            background-color: rgba(255,255,255,0.2);
+        }
+
+        /* Role Section Styling (Card-like) */
+        .role-section {
+            background-color: #ffffff;
+            border: 1px solid var(--border-color);
+            margin-top: 25px;
+            padding: 25px;
+            border-radius: var(--border-radius);
+            box-shadow: var(--box-shadow-lg);
+        }
+        .role-section h2 {
+            color: var(--primary-color);
+            border-bottom: 2px solid var(--primary-color);
+            padding-bottom: 12px;
+            margin-top: 0;
+            margin-bottom: 20px;
+            font-size: 1.8rem;
+            font-weight: 500;
+        }
+
+        /* Role-Specific Navigation (Tabs or Pills) */
+        .role-nav ul {
+            list-style-type: none;
+            padding: 0;
+            margin-bottom: 25px;
+            display: flex;
+            flex-wrap: wrap;
+            border-bottom: 1px solid var(--border-color);
+        }
+        .role-nav ul li {
+            margin-right: 5px;
+            margin-bottom: -1px; /* Overlap border */
+        }
+        .role-nav ul li a {
+            color: var(--primary-color);
+            text-decoration: none;
+            padding: 0.75rem 1.25rem;
+            display: block;
+            border: 1px solid transparent;
+            border-top-left-radius: var(--border-radius);
+            border-top-right-radius: var(--border-radius);
+            transition: background-color 0.2s ease, color 0.2s ease;
+        }
+        .role-nav ul li a:hover {
+            background-color: var(--light-color);
+            border-color: var(--border-color) var(--border-color) transparent var(--border-color);
+            color: var(--dark-color);
+        }
+        /* Simulate active tab, could be done with JS by adding a class */
+        .role-nav ul li a.active-link { /* Add .active-link class to current tab if needed */
+            background-color: #ffffff;
+            border-color: var(--border-color) var(--border-color) #ffffff var(--border-color);
+            color: var(--dark-color);
+            font-weight: 500;
+        }
+
+        /* Module Styling (Content Blocks) */
+        .module {
+            border: 1px solid #e0e0e0; /* Softer border for inner modules */
+            margin-top: 20px;
+            padding: 20px;
+            background-color: #ffffff;
+            border-radius: var(--border-radius);
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        }
+        .module h3 {
+            color: var(--dark-color);
+            font-size: 1.5rem;
+            font-weight: 500;
+            border-bottom: 1px solid #eee;
+            padding-bottom: 10px;
+            margin-top: 0;
+            margin-bottom: 20px;
+        }
+        .module h4 {
+            color: var(--secondary-color);
+            font-size: 1.2rem;
+            margin-top: 20px;
+            margin-bottom: 10px;
+        }
+
+        /* Table Styling */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 15px;
+            background-color: #fff;
+            box-shadow: var(--box-shadow);
+            border-radius: var(--border-radius);
+            overflow: hidden; /* For border-radius on table */
+        }
+        th, td {
+            border: 1px solid var(--border-color);
+            padding: 0.9rem 1rem;
+            text-align: left;
+            vertical-align: middle;
+        }
+        th {
+            background-color: var(--light-color);
+            color: var(--dark-color);
+            font-weight: 600;
+        }
+        tbody tr:nth-child(odd) {
+            background-color: #fdfdfd;
+        }
+        tbody tr:hover {
+            background-color: #e9ecef; /* A bit darker than --light-color */
+        }
+
+        /* Form Styling */
+        .form-group {
+            margin-bottom: 1.25rem;
+        }
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 500;
+            color: var(--dark-color);
+        }
+        .form-group input[type="text"],
+        .form-group input[type="password"],
+        .form-group input[type="email"],
+        .form-group input[type="date"],
+        .form-group input[type="datetime-local"],
+        .form-group input[type="number"],
+        .form-group select,
+        .form-group textarea,
+        input[type="text"][placeholder*="搜索"], /* For search inputs outside form-group */
+        input[type="file"] {
+            display: block;
+            width: 100%;
+            padding: 0.6rem 0.9rem;
+            font-size: 1rem;
+            line-height: 1.5;
+            color: var(--text-color);
+            background-color: #fff;
+            background-clip: padding-box;
+            border: 1px solid var(--border-color);
+            border-radius: var(--border-radius);
+            transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
+        }
+        .form-group input[type="file"] {
+            padding: 0.3rem; /* File inputs are tricky */
+        }
+        .form-group input:focus,
+        .form-group select:focus,
+        .form-group textarea:focus {
+            border-color: var(--primary-color);
+            outline: 0;
+            box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
+        }
+        .form-group textarea {
+            min-height: 100px;
+            resize: vertical;
+        }
+        .form-group input[type="radio"],
+        .form-group input[type="checkbox"] {
+            margin-right: 0.3rem;
+            vertical-align: middle;
+        }
+
+        /* Button Styling */
+        .button, button {
+            display: inline-block;
+            font-weight: 500;
+            color: #fff;
+            text-align: center;
+            vertical-align: middle;
+            cursor: pointer;
+            user-select: none;
+            background-color: var(--primary-color);
+            border: 1px solid var(--primary-color);
+            padding: 0.6rem 1.2rem;
+            font-size: 1rem;
+            line-height: 1.5;
+            border-radius: var(--border-radius);
+            transition: color 0.15s ease-in-out, background-color 0.15s ease-in-out, border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
+            text-decoration: none;
+            margin-top: 5px; /* Consistent top margin */
+            margin-right: 5px; /* Consistent right margin for inline buttons */
+        }
+        .button:hover, button:hover {
+            opacity: 0.85;
+        }
+        .button:focus, button:focus {
+            outline: 0;
+            box-shadow: 0 0 0 0.2rem rgba(var(--primary-color-rgb, 0, 123, 255), 0.5); /* Needs --primary-color-rgb if used */
+        }
+        .button-success, .button.success { background-color: var(--success-color); border-color: var(--success-color); }
+        .button-danger, .button.danger { background-color: var(--danger-color); border-color: var(--danger-color); }
+        .button-info, .button.info { background-color: var(--info-color); border-color: var(--info-color); }
+        .button-warning, .button.warning { background-color: var(--warning-color); border-color: var(--warning-color); color: var(--dark-color);}
+        .button-default, .button.default { background-color: var(--secondary-color); border-color: var(--secondary-color); }
+        .button-small, button.small { padding: 0.25rem 0.5rem; font-size: 0.875rem; line-height: 1.5; border-radius: 0.2rem; }
+        .button[disabled] { opacity: 0.65; cursor: not-allowed; }
+
+        .inline-buttons button, .inline-buttons .button { margin-top:0; margin-bottom: 5px;} /* Adjust for table cell context */
+
+
+        /* Question Block Styling */
+        .question-block {
+            border: 1px solid #e9ecef;
+            padding: 15px;
+            margin-bottom: 15px;
+            border-radius: var(--border-radius);
+            background-color: var(--light-color);
+        }
+        .question-block h5 {
+            margin-top: 0;
+            margin-bottom: 10px;
+            font-size: 1.1rem;
+            font-weight: 500;
+            color: var(--dark-color);
+        }
+
+        /* Discussion Forum Styling */
+        .discussion-post {
+            border: 1px solid var(--border-color);
+            padding: 15px;
+            margin-bottom: 15px;
+            border-radius: var(--border-radius);
+            background-color: #fff;
+            box-shadow: var(--box-shadow);
+        }
+        .discussion-post h5 { margin-top:0; font-size: 1.25rem; color: var(--primary-color); }
+        .discussion-post p { margin-bottom: 0.5rem; }
+        .discussion-post .post-meta { font-size: 0.85rem; color: var(--muted-color); margin-bottom: 10px;}
+        .discussion-reply {
+            border-top: 1px dashed #e0e0e0;
+            padding: 10px;
+            margin-left: 25px;
+            margin-top: 10px;
+            background-color: var(--light-color);
+            border-radius: var(--border-radius);
+        }
+        .discussion-reply p { margin-bottom: 0.3rem; }
+        .discussion-reply .reply-author { font-weight: 500; }
+
+        /* Highlight & Notification Styling */
+        .highlight {
+            color: var(--danger-color);
+            font-weight: bold;
+        }
+        .notification-badge {
+            background-color: var(--danger-color);
+            color: white;
+            padding: 0.15em 0.4em;
+            font-size: 0.75em;
+            border-radius: 0.25rem;
+            vertical-align: super;
+        }
+        .status-badge {
+            padding: 0.3em 0.6em;
+            font-size: 0.8em;
+            font-weight: 500;
+            border-radius: var(--border-radius);
+            color: #fff;
+        }
+        .status-pending { background-color: var(--warning-color); color: var(--dark-color); }
+        .status-submitted { background-color: var(--info-color); }
+        .status-graded { background-color: var(--success-color); }
+        .status-not-submitted { background-color: var(--danger-color); }
+        .status-inprogress { background-color: #ffc107; color: #212529; } /* Using warning for this too */
+        .status-unstarted { background-color: #6c757d; } /* Secondary for unstarted */
+
+
+        /* Specific Hidden Form Styling */
+        .hidden-form-section {
+            margin-top: 20px;
+            padding: 20px;
+            border: 1px solid var(--border-color);
+            border-radius: var(--border-radius);
+            background-color: var(--light-color);
+            box-shadow: inset 0 1px 1px rgba(0,0,0,.05);
+        }
+        .hidden-form-section h4 {
+            margin-top: 0;
+            color: var(--primary-color);
+        }
+
+
+        /* Footer */
+        footer.main-footer {
+            text-align:center;
+            padding: 25px 0;
+            background-color: var(--dark-color);
+            color: var(--light-color);
+            margin-top: 30px;
+            font-size: 0.9rem;
+        }
+        footer.main-footer p { margin: 0; }
+
+    </style>
+</head>
+<body>
+
+    <header class="main-header">
+        <h1>在线作业系统 - 优化原型</h1>
+    </header>
+
+    <div class="main-nav-jumplinks">
+        <a href="#login-page">登录页面</a> |
+        <a href="#admin-view">管理员视图</a> |
+        <a href="#teacher-view">教师视图</a> |
+        <a href="#student-view">学生视图</a>
+    </div>
+
+    <div class="container">
+
+        <section id="login-page" class="role-section">
+            <h2>用户登录</h2>
+            <div class="module">
+                <form>
+                    <div class="form-group">
+                        <label for="login-username">用户名 / 邮箱:</label>
+                        <input type="text" id="login-username" name="username" placeholder="请输入用户名或邮箱">
+                    </div>
+                    <div class="form-group">
+                        <label for="login-password">密码:</label>
+                        <input type="password" id="login-password" name="password" placeholder="请输入密码">
+                    </div>
+                    <button type="submit" class="button" style="width:100%;">登录</button>
+                </form>
+            </div>
+        </section>
+
+        <section id="admin-view" class="role-section">
+            <h2>管理员视图</h2>
+            <nav class="role-nav">
+                <ul>
+                    <li><a href="#admin-dashboard" class="active-link">首页仪表盘</a></li>
+                    <li><a href="#admin-user-management">用户管理</a></li>
+                    <li><a href="#admin-class-management">班级管理</a></li>
+                    <li><a href="#admin-statistics">统计分析</a></li>
+                    <li><a href="#admin-discussion">讨论区</a></li>
+                    <li><a href="#admin-profile">个人信息</a></li>
+                </ul>
+            </nav>
+
+            <div id="admin-dashboard" class="module">
+                <h3>首页仪表盘</h3>
+                <p><strong>系统总体概况:</strong></p>
+                <ul>
+                    <li>用户总数: <span>1200</span></li>
+                    <li>教师数量: <span>100</span></li>
+                    <li>学生数量: <span>1100</span></li>
+                    <li>已发布作业总数: <span>560</span></li>
+                    <li>全站作业平均提交率: <span>85%</span></li>
+                </ul>
+            </div>
+
+            <div id="admin-user-management" class="module">
+                <h3>用户管理</h3>
+                <button class="button success" onclick="showAdminCreateUserForm()">新增用户</button>
+                <button class="button info" onclick="alert('批量导入用户功能触发')">批量导入用户</button>
+                <div id="admin-create-user-form" style="display:none;" class="hidden-form-section">
+                    <h4>新增/编辑用户</h4>
+                    <form>
+                        <div class="form-group">
+                            <label for="admin-user-name">姓名:</label>
+                            <input type="text" id="admin-user-name" name="name">
+                        </div>
+                        <div class="form-group">
+                            <label for="admin-user-email">邮箱:</label>
+                            <input type="email" id="admin-user-email" name="email">
+                        </div>
+                        <div class="form-group">
+                            <label for="admin-user-role">角色:</label>
+                            <select id="admin-user-role" name="role">
+                                <option value="teacher">教师</option>
+                                <option value="student">学生</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="admin-user-password">初始密码 (留空则自动生成):</label>
+                            <input type="password" id="admin-user-password" name="password">
+                        </div>
+                        <button type="submit" class="button success">保存用户</button>
+                        <button type="button" class="button default" onclick="document.getElementById('admin-create-user-form').style.display='none'">取消</button>
+                    </form>
+                </div>
+                <h4>用户列表</h4>
+                <input type="text" placeholder="搜索用户..." style="width: 300px; margin-bottom: 15px; padding: 0.6rem 0.9rem; border: 1px solid var(--border-color); border-radius: var(--border-radius);">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>姓名</th>
+                            <th>邮箱</th>
+                            <th>角色</th>
+                            <th>状态</th>
+                            <th>操作</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>101</td>
+                            <td>张老师</td>
+                            <td>zhang@example.com</td>
+                            <td>教师</td>
+                            <td><span class="status-badge" style="background-color: var(--success-color);">启用</span></td>
+                            <td class="inline-buttons">
+                                <button class="button info small" onclick="showAdminCreateUserForm()">编辑</button>
+                                <button class="button warning small">禁用</button>
+                                <button class="button danger small">删除</button>
+                                <button class="button default small">重置密码</button>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>201</td>
+                            <td>李同学</td>
+                            <td>li@example.com</td>
+                            <td>学生</td>
+                            <td><span class="status-badge" style="background-color: var(--success-color);">启用</span></td>
+                            <td class="inline-buttons">
+                                <button class="button info small" onclick="showAdminCreateUserForm()">编辑</button>
+                                <button class="button warning small">禁用</button>
+                                <button class="button danger small">删除</button>
+                                <button class="button default small">重置密码</button>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>202</td>
+                            <td>王同学</td>
+                            <td>wang@example.com</td>
+                            <td>学生</td>
+                            <td><span class="status-badge" style="background-color: var(--secondary-color);">禁用</span></td>
+                            <td class="inline-buttons">
+                                <button class="button info small" onclick="showAdminCreateUserForm()">编辑</button>
+                                <button class="button success small">启用</button>
+                                <button class="button danger small">删除</button>
+                                <button class="button default small">重置密码</button>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <div id="admin-class-management" class="module">
+                <h3>班级管理</h3>
+                <button class="button success" onclick="showAdminCreateClassForm()">新建班级</button>
+                 <div id="admin-create-class-form" style="display:none;" class="hidden-form-section">
+                    <h4>新增/编辑班级</h4>
+                    <form>
+                        <div class="form-group">
+                            <label for="admin-class-name">班级名称:</label>
+                            <input type="text" id="admin-class-name" name="classname" placeholder="例如：高一（1）班">
+                        </div>
+                        <div class="form-group">
+                            <label for="admin-class-description">班级描述 (可选):</label>
+                            <textarea id="admin-class-description" name="description"></textarea>
+                        </div>
+                        <div class="form-group">
+                            <label for="admin-class-teacher">班主任/负责教师 (可选):</label>
+                            <select id="admin-class-teacher" name="class-teacher">
+                                <option value="">-- 选择教师 --</option>
+                                <option value="101">张老师</option>
+                                {/* 其他教师选项 */}
+                            </select>
+                        </div>
+                        <button type="submit" class="button success">保存班级</button>
+                        <button type="button" class="button default" onclick="document.getElementById('admin-create-class-form').style.display='none'">取消</button>
+                    </form>
+                </div>
+                <h4>班级列表</h4>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>班级ID</th>
+                            <th>班级名称</th>
+                            <th>学生人数</th>
+                            <th>负责教师</th>
+                            <th>操作</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>C001</td>
+                            <td>高一（1）班</td>
+                            <td>45</td>
+                            <td>张老师</td>
+                            <td class="inline-buttons">
+                                <button class="button info small" onclick="showAdminCreateClassForm()">编辑</button>
+                                <button class="button default small">管理成员</button>
+                                <button class="button danger small">删除</button>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>C002</td>
+                            <td>高一（2）班</td>
+                            <td>42</td>
+                            <td>刘老师</td>
+                            <td class="inline-buttons">
+                                <button class="button info small" onclick="showAdminCreateClassForm()">编辑</button>
+                                <button class="button default small">管理成员</button>
+                                <button class="button danger small">删除</button>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <div id="admin-statistics" class="module">
+                <h3>统计分析 (全局)</h3>
+                <h4>作业完成率统计 (全校)</h4>
+                <div style="background: #eee; padding: 20px; text-align: center; border-radius: var(--border-radius); margin-bottom:15px;">[图表占位符 - 全校作业平均完成率饼图/柱状图]</div>
+                <h4>各班级作业提交情况对比</h4>
+                <table>
+                    <thead>
+                        <tr><th>班级</th><th>平均提交率</th><th>平均分</th></tr>
+                    </thead>
+                    <tbody>
+                        <tr><td>高一（1）班</td><td>90%</td><td>85</td></tr>
+                        <tr><td>高一（2）班</td><td>88%</td><td>82</td></tr>
+                    </tbody>
+                </table>
+                <button class="button">导出全局数据 (Excel)</button>
+                <button class="button info">导出全局数据 (PDF)</button>
+            </div>
+
+            <div id="admin-discussion" class="module">
+                <h3>讨论区 (管理员视图)</h3>
+                 <p>管理员可以查看所有帖子并进行管理干预。</p>
+                <div class="discussion-post">
+                    <h5>关于第三章课后习题的疑问</h5>
+                    <p class="post-meta"><strong>作者：</strong> 李同学 (学生) &nbsp;&nbsp; <strong>发布时间：</strong> 2025-05-07 10:30</p>
+                    <p>内容：第三章的第5题，我不太理解题目中关于“势能”的描述...</p>
+                    <div class="inline-buttons">
+                        <button class="button info small">查看详情</button>
+                        <button class="button danger small">删除帖子</button>
+                        <button class="button default small">置顶</button>
+                    </div>
+                </div>
+                 <div class="discussion-post">
+                    <h5>期中复习资料分享</h5>
+                    <p class="post-meta"><strong>作者：</strong> 张老师 (教师) &nbsp;&nbsp; <strong>发布时间：</strong> 2025-05-06 15:00</p>
+                    <p>内容：同学们，这是我整理的期中复习重点，请大家下载查看。</p>
+                    <div class="inline-buttons">
+                        <button class="button info small">查看详情</button>
+                        <button class="button danger small">删除帖子</button>
+                        <button class="button default small">置顶</button>
+                    </div>
+                </div>
+            </div>
+
+            <div id="admin-profile" class="module">
+                <h3>个人信息</h3>
+                <form>
+                    <div class="form-group">
+                        <label for="admin-profile-name">姓名:</label>
+                        <input type="text" id="admin-profile-name" value="系统管理员" readonly>
+                    </div>
+                    <div class="form-group">
+                        <label for="admin-profile-email">邮箱:</label>
+                        <input type="email" id="admin-profile-email" value="admin@system.com">
+                    </div>
+                    <div class="form-group">
+                        <label for="admin-profile-new-password">修改密码:</label>
+                        <input type="password" id="admin-profile-new-password" placeholder="输入新密码">
+                    </div>
+                    <div class="form-group">
+                        <label for="admin-profile-confirm-password">确认新密码:</label>
+                        <input type="password" id="admin-profile-confirm-password" placeholder="再次输入新密码">
+                    </div>
+                    <button type="submit" class="button">更新信息</button>
+                </form>
+            </div>
+        </section>
+
+        <section id="teacher-view" class="role-section">
+            <h2>教师视图 (张老师)</h2>
+             <nav class="role-nav">
+                <ul>
+                    <li><a href="#teacher-dashboard" class="active-link">首页</a></li>
+                    <li><a href="#teacher-my-assignments">我的作业</a></li>
+                    <li><a href="#teacher-grade-assignments">批改作业</a></li>
+                    <li><a href="#teacher-discussion">讨论区</a></li>
+                    <li><a href="#teacher-statistics">统计分析</a></li>
+                    <li><a href="#teacher-profile">个人信息</a></li>
+                </ul>
+            </nav>
+
+            <div id="teacher-dashboard" class="module">
+                <h3>首页</h3>
+                <p>欢迎您，张老师！</p>
+                <ul>
+                    <li>待批改作业数量: <span class="highlight">3</span> (<a href="#teacher-grade-assignments" class="button info small" style="text-decoration:none; color:white;">立即批改</a>)</li>
+                    <li>近期截止的作业:
+                        <ul>
+                            <li>《第一单元测试》 - 截止日期: 2025-05-10</li>
+                            <li>《文言文阅读练习》 - 截止日期: 2025-05-12</li>
+                        </ul>
+                    </li>
+                </ul>
+            </div>
+
+            <div id="teacher-my-assignments" class="module">
+                <h3>我的作业</h3>
+                <button class="button success" onclick="showTeacherCreateAssignmentForm()">新建作业</button>
+                <div id="teacher-create-assignment-form" style="display:none;" class="hidden-form-section">
+                    <h4>新建/编辑作业</h4>
+                    <form>
+                        <div class="form-group">
+                            <label for="teacher-assignment-title">作业标题:</label>
+                            <input type="text" id="teacher-assignment-title" name="title" placeholder="例如：第二单元综合练习">
+                        </div>
+                        <div class="form-group">
+                            <label for="teacher-assignment-description">详细要求和说明:</label>
+                            <textarea id="teacher-assignment-description" name="description" placeholder="请在此处填写作业的具体要求..."></textarea>
+                        </div>
+
+                        <h4>题目编辑</h4>
+                        <div id="questions-container" style="margin-bottom: 15px;">
+                            <div class="question-block">
+                                <h5>题目1: 选择题</h5>
+                                <div class="form-group">
+                                    <label>题干:</label>
+                                    <input type="text" placeholder="输入选择题题干">
+                                </div>
+                                <label>选项:</label>
+                                <div><input type="text" placeholder="选项A内容" style="width:80%; display:inline-block; margin-right:5px;"> <input type="radio" name="q1_correct"> 正确答案</div>
+                                <div><input type="text" placeholder="选项B内容" style="width:80%; display:inline-block; margin-right:5px;"> <input type="radio" name="q1_correct"></div>
+                                <div><input type="text" placeholder="选项C内容" style="width:80%; display:inline-block; margin-right:5px;"> <input type="radio" name="q1_correct"></div>
+                                <div><input type="text" placeholder="选项D内容" style="width:80%; display:inline-block; margin-right:5px;"> <input type="radio" name="q1_correct"></div>
+                                <button type="button" class="button danger small" style="margin-top:10px;">删除此题</button>
+                            </div>
+                        </div>
+                        <button type="button" class="button info small" onclick="addQuestion('choice')">添加选择题</button>
+                        <button type="button" class="button info small" onclick="addQuestion('fill')">添加填空题</button>
+                        <button type="button" class="button info small" onclick="addQuestion('tf')">添加判断题</button>
+                        <button type="button" class="button info small" onclick="addQuestion('short')">添加简答题</button>
+
+                        <div class="form-group" style="margin-top:20px;">
+                            <label for="teacher-assignment-attachments">上传附件 (可多选):</label>
+                            <input type="file" id="teacher-assignment-attachments" name="attachments" multiple>
+                            <div style="margin-top:5px; font-size:0.9em;">已上传: <span>material1.pdf, diagram.jpg</span> <a href="#" style="color:var(--danger-color); text-decoration:none;">移除</a></div>
+                        </div>
+
+                        <h4>作业设置</h4>
+                        <div class="form-group">
+                            <label for="teacher-assignment-due-date">截止日期:</label>
+                            <input type="datetime-local" id="teacher-assignment-due-date" name="due_date">
+                        </div>
+                        <div class="form-group">
+                            <label for="teacher-assignment-visibility">可见范围 (指定班级 - 按住Ctrl/Cmd多选):</label>
+                            <select id="teacher-assignment-visibility" name="visibility" multiple style="min-height: 80px;">
+                                <option value="C001">高一（1）班</option>
+                                <option value="C002">高一（2）班</option>
+                            </select>
+                        </div>
+                         <div class="form-group">
+                            <label>发布选项:</label>
+                            <div>
+                                <input type="radio" name="publish_option" id="publish_now" value="now" checked> <label for="publish_now" style="font-weight:normal; display:inline;">立即发布</label>
+                            </div>
+                            <div>
+                                <input type="radio" name="publish_option" id="publish_schedule" value="schedule"> <label for="publish_schedule" style="font-weight:normal; display:inline;">定时发布</label> <input type="datetime-local" name="schedule_time" style="width:auto; display:inline-block;">
+                            </div>
+                        </div>
+                        <button type="submit" class="button success">发布作业</button>
+                        <button type="button" class="button default" onclick="document.getElementById('teacher-create-assignment-form').style.display='none'">取消</button>
+                    </form>
+                </div>
+
+                <h4>已发布作业列表</h4>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>作业标题</th>
+                            <th>发布日期</th>
+                            <th>截止日期</th>
+                            <th>题目数</th>
+                            <th>完成情况</th>
+                            <th>操作</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>《第一单元测试》</td>
+                            <td>2025-05-01</td>
+                            <td>2025-05-10</td>
+                            <td>15</td>
+                            <td><a href="#teacher-grade-assignments">30/45 提交</a></td>
+                            <td class="inline-buttons">
+                                <button class="button info small">编辑</button>
+                                <button class="button default small">查看提交</button>
+                                <button class="button danger small">撤销</button>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>《文言文阅读练习》</td>
+                            <td>2025-05-05</td>
+                            <td>2025-05-12</td>
+                            <td>5</td>
+                            <td>10/45 提交</td>
+                             <td class="inline-buttons">
+                                <button class="button info small">编辑</button>
+                                <button class="button default small">查看提交</button>
+                                <button class="button danger small">撤销</button>
+                            </td>
+                        </tr>
+                         <tr>
+                            <td>《实验报告提交》</td>
+                            <td>2025-04-20</td>
+                            <td>2025-04-30</td>
+                            <td>1</td>
+                            <td><span style="color:var(--success-color);">45/45 (已批改)</span></td>
+                             <td class="inline-buttons">
+                                <button class="button info small" disabled>编辑</button>
+                                <button class="button default small">查看提交</button>
+                                <button class="button danger small" disabled>撤销</button>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <div id="teacher-grade-assignments" class="module">
+                <h3>作业批改</h3>
+                <div class="form-group">
+                    <label for="teacher-select-assignment-to-grade">选择要批改的作业:</label>
+                    <select id="teacher-select-assignment-to-grade" onchange="showSubmissionsForGrading(this.value)">
+                        <option value="">-- 请选择作业 --</option>
+                        <option value="hw1">《第一单元测试》 (30/45 提交)</option>
+                        <option value="hw2">《文言文阅读练习》 (10/45 提交)</option>
+                    </select>
+                </div>
+
+                <div id="teacher-submission-list" style="display:none; margin-top:15px;">
+                    <h4>《第一单元测试》 - 学生提交列表</h4>
+                    <div style="display:flex; gap: 15px; margin-bottom:15px; align-items:center;">
+                        <div class="form-group" style="margin-bottom:0; flex-grow:1;">
+                            <label for="filter-class" style="margin-bottom:0.2rem;">筛选班级:</label>
+                            <select id="filter-class"><option>高一（1）班</option><option>高一（2）班</option><option>所有班级</option></select>
+                        </div>
+                        <div class="form-group" style="margin-bottom:0; flex-grow:1;">
+                             <label for="search-student-name" style="margin-bottom:0.2rem;">按姓名搜索:</label>
+                            <input type="text" id="search-student-name" placeholder="输入学生姓名">
+                        </div>
+                    </div>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>学生姓名</th>
+                                <th>班级</th>
+                                <th>提交时间</th>
+                                <th>状态</th>
+                                <th>操作</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>李同学</td>
+                                <td>高一（1）班</td>
+                                <td>2025-05-09 10:00</td>
+                                <td><span class="status-badge status-pending">待批改</span></td>
+                                <td class="inline-buttons"><button class="button success small" onclick="showGradingInterface('李同学', 'hw1')">批改</button></td>
+                            </tr>
+                            <tr>
+                                <td>王同学</td>
+                                <td>高一（1）班</td>
+                                <td>2025-05-09 11:30</td>
+                                <td><span class="status-badge status-pending">待批改</span></td>
+                                <td class="inline-buttons"><button class="button success small" onclick="showGradingInterface('王同学', 'hw1')">批改</button></td>
+                            </tr>
+                            <tr>
+                                <td>赵同学</td>
+                                <td>高一（2）班</td>
+                                <td>-</td>
+                                <td><span class="status-badge status-not-submitted">未提交</span></td>
+                                <td class="inline-buttons"><button class="button info small">发送提醒</button></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <div id="teacher-grading-interface" style="display:none;" class="hidden-form-section">
+                    <h4>正在批改: <span id="grading-student-name" style="color:var(--primary-color);">[学生姓名]</span> - 《第一单元测试》</h4>
+                    <div class="question-block">
+                        <h5>题目1: (选择题) 什么是太阳系中最大的行星? (系统自动判题: <span style="color:var(--success-color);">正确</span>)</h5>
+                        <p><strong>学生答案:</strong> B) 木星</p>
+                        <p><strong>正确答案:</strong> B) 木星</p>
+                        <label>得分: <input type="number" value="10" style="width:70px; display:inline-block;"> / 10</label>
+                        <textarea placeholder="针对该题的评语或解答说明 (可选)" style="margin-top:5px;"></textarea>
+                    </div>
+                    <div class="question-block">
+                        <h5>题目2: (填空题) 地球的天然卫星是 ____ 。 (系统自动判题: <span style="color:var(--danger-color);">错误</span>, 关键词不匹配)</h5>
+                        <p><strong>学生答案:</strong> 月亮</p>
+                        <p><strong>参考答案:</strong> 月球</p>
+                        <label>得分: <input type="number" value="0" style="width:70px; display:inline-block;"> / 5</label> <button type="button" class="button info small">调整为部分得分</button>
+                        <textarea placeholder="针对该题的评语或解答说明 (可选)" style="margin-top:5px;"></textarea>
+                    </div>
+                    <div class="question-block">
+                        <h5>题目3: (简答题) 请简述光合作用的过程。</h5>
+                        <p><strong>学生答案:</strong> [学生填写的详细答案文本...]</p>
+                        <label>得分: <input type="number" style="width:70px; display:inline-block;"> / 15</label>
+                        <textarea placeholder="针对该题的评语或解答说明" style="margin-top:5px;"></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label for="teacher-overall-feedback"><strong>本次作业总体评语:</strong></label>
+                        <textarea id="teacher-overall-feedback"></textarea>
+                    </div>
+                    <p><strong>作业总得分: <span id="grading-total-score" style="font-size:1.2em; color:var(--primary-color);">[自动计算]</span></strong></p>
+                    <button class="button success">保存并提交此学生成绩</button>
+                    <button class="button default">保存批改进度</button>
+                    <button class="button info">下一个学生</button>
+                    <hr style="margin: 20px 0;">
+                    <button class="button danger" onclick="alert('全部批改完成，统一发布成绩功能触发')">全部批改完成，发布成绩</button>
+                </div>
+            </div>
+
+            <div id="teacher-discussion" class="module">
+                <h3>讨论区</h3>
+                <button class="button success" onclick="showTeacherNewPostForm()">发布新帖子</button>
+                <div id="teacher-new-post-form" style="display:none;" class="hidden-form-section">
+                     <h4>发布新帖子/回复</h4>
+                    <form>
+                        <div class="form-group">
+                            <label for="teacher-post-title">帖子标题:</label>
+                            <input type="text" id="teacher-post-title" name="post_title">
+                        </div>
+                        <div class="form-group">
+                            <label for="teacher-post-content">内容:</label>
+                            <textarea id="teacher-post-content" name="post_content" placeholder="支持富文本..."></textarea>
+                        </div>
+                        <button type="submit" class="button success">发布</button>
+                        <button type="button" class="button default" onclick="document.getElementById('teacher-new-post-form').style.display='none'">取消</button>
+                    </form>
+                </div>
+                <h4>帖子列表 (可按班级/课程筛选)</h4>
+                 <input type="text" placeholder="搜索帖子标题或内容..." style="width: 100%; max-width:400px; margin-bottom:15px;">
+                <div class="discussion-post">
+                    <h5>关于《第一单元测试》第5题的疑问 <span class="notification-badge">新</span></h5>
+                    <p class="post-meta"><strong>作者：</strong> 刘同学 (学生) &nbsp;&nbsp; <strong>发布时间：</strong> 2025-05-08 09:15</p>
+                    <p>内容：老师，第五题的选择题我选了C，但是答案是A，能解释一下为什么吗？</p>
+                    <div class="inline-buttons">
+                        <button class="button info small" onclick="showTeacherPostDetail()">查看并回复</button>
+                        <button class="button danger small">删除帖子</button>
+                        <button class="button default small">置顶</button>
+                    </div>
+                    <div id="teacher-post-detail" style="display:none; margin-top:10px;">
+                        <div class="discussion-reply">
+                            <p><span class="reply-author">张老师 (我)：</span>刘同学你好，这道题考察的是XX知识点，选项A的解释是YYY，而选项C的错误在于ZZZ。希望这个解释对你有帮助。</p>
+                        </div>
+                        <textarea placeholder="输入您的回复..." style="width:100%; min-height:60px; margin-top:10px;" class="form-group"></textarea>
+                        <button class="button success small">提交回复</button>
+                    </div>
+                </div>
+            </div>
+
+            <div id="teacher-statistics" class="module">
+                <h3>统计分析</h3>
+                <h4>作业: 《第一单元测试》 - 高一（1）班</h4>
+                <p>提交率: 30/45 (66.67%) &nbsp;&nbsp; <button class="button info small">查看未提交名单</button></p>
+                <p>平均分: 78.5</p>
+                <p>最高分: 98 &nbsp;&nbsp; 最低分: 55</p>
+                <h4>成绩分布图:</h4>
+                <div style="background: #eee; padding: 20px; text-align: center; border-radius: var(--border-radius); margin-bottom:15px;">[图表占位符 - 《第一单元测试》成绩分布柱状图]</div>
+                <h4>学生个人成绩追踪 (高一（1）班 - 李同学)</h4>
+                <table>
+                    <thead><tr><th>作业名称</th><th>得分</th><th>班级平均分</th></tr></thead>
+                    <tbody>
+                        <tr><td>《单元预习》</td><td>90</td><td>85</td></tr>
+                        <tr><td>《章节练习1.1》</td><td>85</td><td>80</td></tr>
+                        <tr><td>《第一单元测试》</td><td>批改后显示</td><td>批改后显示</td></tr>
+                    </tbody>
+                </table>
+                <div style="background: #eee; padding: 20px; text-align: center; border-radius: var(--border-radius); margin-top:15px;">[图表占位符 - 李同学历次作业得分与班级平均分对比曲线图]</div>
+                <button class="button" style="margin-top:15px;">导出班级成绩报表 (Excel)</button>
+            </div>
+
+            <div id="teacher-profile" class="module">
+                <h3>个人信息</h3>
+                 <form>
+                    <div class="form-group">
+                        <label for="teacher-profile-name">姓名:</label>
+                        <input type="text" id="teacher-profile-name" value="张老师" readonly>
+                    </div>
+                    <div class="form-group">
+                        <label for="teacher-profile-email">邮箱:</label>
+                        <input type="email" id="teacher-profile-email" value="zhang@example.com">
+                    </div>
+                    <div class="form-group">
+                        <label for="teacher-profile-new-password">修改密码:</label>
+                        <input type="password" id="teacher-profile-new-password" placeholder="输入新密码">
+                    </div>
+                    <div class="form-group">
+                        <label for="teacher-profile-confirm-password">确认新密码:</label>
+                        <input type="password" id="teacher-profile-confirm-password" placeholder="再次输入新密码">
+                    </div>
+                    <button type="submit" class="button">更新信息</button>
+                </form>
+            </div>
+        </section>
+
+        <section id="student-view" class="role-section">
+            <h2>学生视图 (李同学)</h2>
+            <nav class="role-nav">
+                <ul>
+                    <li><a href="#student-dashboard" class="active-link">首页</a></li>
+                    <li><a href="#student-my-assignments">我的作业</a></li>
+                    <li><a href="#student-my-grades">我的成绩</a></li>
+                    <li><a href="#student-discussion">讨论区</a></li>
+                    <li><a href="#student-profile">个人信息</a></li>
+                </ul>
+            </nav>
+
+            <div id="student-dashboard" class="module">
+                <h3>首页</h3>
+                <p>欢迎你，李同学！</p>
+                <ul>
+                    <li><span style="color: var(--primary-color); font-weight: bold;">新作业提醒:</span> 《第二单元综合练习》 (<a href="#student-my-assignments" class="button info small" style="text-decoration:none; color:white;">立即查看</a>)</li>
+                    <li>即将截止的作业: 《第一单元测试》 - 截止日期: <span class="highlight">2025-05-10 (还剩2天)</span></li>
+                    <li>新消息: 讨论区有 <span class="notification-badge">2</span> 条新回复 (<a href="#student-discussion" class="button info small" style="text-decoration:none; color:white;">去看看</a>)</li>
+                    <li>最新成绩发布: 《章节练习1.1》已批改 (<a href="#student-my-grades" class="button success small" style="text-decoration:none; color:white;">查看成绩</a>)</li>
+                </ul>
+            </div>
+
+            <div id="student-my-assignments" class="module">
+                <h3>我的作业</h3>
+                <h4>作业任务列表</h4>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>作业标题</th>
+                            <th>布置教师</th>
+                            <th>截止时间</th>
+                            <th>状态</th>
+                            <th>操作</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr style="background-color: #fff3cd;"> <td>《第一单元测试》 <span class="highlight">(即将截止)</span></td>
+                            <td>张老师</td>
+                            <td>2025-05-10 23:59</td>
+                            <td><span class="status-badge status-inprogress">进行中 (草稿)</span></td>
+                            <td class="inline-buttons"><button class="button success small" onclick="showStudentAssignmentDetail('hw1_test', '第一单元测试')">继续作答</button></td>
+                        </tr>
+                        <tr>
+                            <td>《文言文阅读练习》</td>
+                            <td>王老师</td>
+                            <td>2025-05-12 23:59</td>
+                             <td><span class="status-badge status-unstarted">未开始</span></td>
+                            <td class="inline-buttons"><button class="button success small" onclick="showStudentAssignmentDetail('hw2_reading', '文言文阅读练习')">开始作业</button></td>
+                        </tr>
+                        <tr>
+                            <td>《章节练习1.1》</td>
+                            <td>张老师</td>
+                            <td>2025-05-05 23:59</td>
+                            <td><span class="status-badge status-submitted">已提交 (待批改)</span></td>
+                            <td class="inline-buttons"><button class="button info small" onclick="showStudentSubmittedDetail('hw3_exercise', '章节练习1.1')">查看已提交</button></td>
+                        </tr>
+                    </tbody>
+                </table>
+
+                <div id="student-assignment-detail" style="display:none;" class="hidden-form-section">
+                    <h4 id="student-assignment-title-display">作业详情: [作业标题]</h4>
+                    <p><strong>要求说明:</strong> [这里是教师填写的作业详细要求和说明内容...]</p>
+                    <p><strong>附件:</strong> <a href="#" download class="button default small">参考资料.pdf</a> <a href="#" download class="button default small">题目图片.jpg</a></p>
+                    <hr style="margin: 15px 0;">
+                    <form id="student-answer-form">
+                        <div class="question-block">
+                            <h5>1. 选择题: 太阳系中最大的行星是？</h5>
+                            <div><input type="radio" name="q1" id="q1a" value="a"> <label for="q1a" style="font-weight:normal;">A) 地球</label></div>
+                            <div><input type="radio" name="q1" id="q1b" value="b"> <label for="q1b" style="font-weight:normal;">B) 木星</label></div>
+                            <div><input type="radio" name="q1" id="q1c" value="c"> <label for="q1c" style="font-weight:normal;">C) 火星</label></div>
+                        </div>
+                        <div class="question-block">
+                            <h5>2. 填空题: 中国的首都是 ______。</h5>
+                            <input type="text" name="q2" class="form-group">
+                        </div>
+                        <div class="question-block">
+                            <h5>3. 判断题: 水在0摄氏度以下会结冰。</h5>
+                            <div><input type="radio" name="q3" id="q3t" value="true"> <label for="q3t" style="font-weight:normal;">对</label></div>
+                            <div><input type="radio" name="q3" id="q3f" value="false"> <label for="q3f" style="font-weight:normal;">错</label></div>
+                        </div>
+                        <div class="question-block">
+                            <h5>4. 简答题: 请描述你对人工智能的看法。 (至少100字)</h5>
+                            <textarea name="q4" rows="5" class="form-group"></textarea>
+                        </div>
+                        <button type="button" class="button default" onclick="alert('草稿已保存！')">保存草稿</button>
+                        <button type="button" class="button success" onclick="confirmSubmission()">提交作业</button>
+                    </form>
+                </div>
+                 <div id="student-submitted-detail" style="display:none;" class="hidden-form-section">
+                    <h4 id="student-submitted-title-display">已提交作业: [作业标题]</h4>
+                     <p><strong>提交时间:</strong> 2025-05-04 14:30</p>
+                    <p><strong>状态:</strong> <span id="submitted-status-info" class="status-badge">[状态]</span></p>
+                    <div class="question-block">
+                        <h5>1. 选择题: 太阳系中最大的行星是？</h5>
+                        <p><strong>你的答案:</strong> B) 木星 <span id="q1-feedback" style="font-style:italic; color: var(--muted-color);"></span></p>
+                    </div>
+                    <div class="question-block">
+                        <h5>4. 简答题: 请描述你对人工智能的看法。</h5>
+                        <p><strong>你的答案:</strong> [学生提交的简答题内容...] <span id="q4-feedback" style="font-style:italic; color: var(--muted-color);"></span></p>
+                        <div id="q4-teacher-comment" style="background-color:#e6f7ff; padding:10px; margin-top:10px; border-left:4px solid var(--info-color); border-radius: var(--border-radius); display:none;">
+                            <strong style="color:var(--info-color);">教师评语:</strong> [教师针对此题的评语]
+                        </div>
+                    </div>
+                    <hr style="margin:15px 0;">
+                    <p><strong>总分:</strong> <span id="submitted-total-score" style="font-weight:bold; font-size:1.2em;">--</span></p>
+                    <div id="submitted-teacher-overall-comment-block" style="background-color:#f0fff0; padding:10px; margin-top:10px; border-left:4px solid var(--success-color); border-radius: var(--border-radius); display:none;">
+                        <strong style="color:var(--success-color);">教师总评:</strong> <span id="submitted-teacher-overall-comment">--</span>
+                    </div>
+                    <button type="button" class="button warning small" style="margin-top:15px;" onclick="alert('已联系教师请求重置提交状态。')">发现错误，联系教师</button>
+                </div>
+            </div>
+
+            <div id="student-my-grades" class="module">
+                <h3>我的成绩</h3>
+                <h4>历次作业成绩列表</h4>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>作业标题</th>
+                            <th>提交日期</th>
+                            <th>批改日期</th>
+                            <th>得分</th>
+                            <th>教师反馈</th>
+                            <th>操作</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>《章节练习1.1》</td>
+                            <td>2025-05-04</td>
+                            <td>2025-05-07</td>
+                            <td><strong>85/100</strong></td>
+                            <td>完成的不错，简答题部分可以更详细一些。</td>
+                            <td class="inline-buttons"><button class="button info small" onclick="showStudentGradedDetail('hw3_exercise', '章节练习1.1', '85/100', '完成的不错，简答题部分可以更详细一些。')">查看详情</button></td>
+                        </tr>
+                        <tr>
+                            <td>《期初摸底测试》</td>
+                            <td>2025-04-10</td>
+                            <td>2025-04-12</td>
+                            <td><strong>72/100</strong></td>
+                            <td>基础知识掌握尚可，需加强计算题练习。</td>
+                            <td class="inline-buttons"><button class="button info small" onclick="showStudentGradedDetail('hw0_baseline', '期初摸底测试', '72/100', '基础知识掌握尚可，需加强计算题练习。')">查看详情</button></td>
+                        </tr>
+                    </tbody>
+                </table>
+                <p style="margin-top:15px;"><strong>平均分:</strong> [计算所有已批改作业的平均分]</p>
+                <div style="background: #eee; padding: 20px; text-align: center; border-radius: var(--border-radius); margin-top:15px;">[图表占位符 - 个人成绩趋势曲线图]</div>
+            </div>
+
+            <div id="student-discussion" class="module">
+                <h3>讨论区</h3>
+                <button class="button success" onclick="showStudentNewPostForm()">发起提问/新帖子</button>
+                <div id="student-new-post-form" style="display:none;" class="hidden-form-section">
+                     <h4>发起提问/新帖子</h4>
+                    <form>
+                        <div class="form-group">
+                            <label for="student-post-title">帖子标题:</label>
+                            <input type="text" id="student-post-title" name="post_title">
+                        </div>
+                        <div class="form-group">
+                            <label for="student-post-content">内容 (请详细描述你的问题):</label>
+                            <textarea id="student-post-content" name="post_content"></textarea>
+                        </div>
+                         <div class="form-group">
+                            <label for="student-post-topic">选择板块/标签 (可选):</label>
+                            <select id="student-post-topic">
+                                <option value="general">综合讨论</option>
+                                <option value="hw_q">作业问答</option>
+                                <option value="course_q">课程疑问</option>
+                            </select>
+                        </div>
+                        <button type="submit" class="button success">发布</button>
+                        <button type="button" class="button default" onclick="document.getElementById('student-new-post-form').style.display='none'">取消</button>
+                    </form>
+                </div>
+                <h4>帖子列表</h4>
+                <input type="text" placeholder="搜索帖子标题或内容..." style="width: 100%; max-width:400px; margin-bottom:15px;">
+                <div class="discussion-post">
+                    <h5>关于《第一单元测试》第5题的疑问 <span class="notification-badge">新</span></h5>
+                    <p class="post-meta"><strong>作者：</strong> 刘同学 &nbsp;&nbsp; <strong>最后回复：</strong> 张老师 (2025-05-08 10:15)</p>
+                    <p>内容：老师，第五题的选择题我选了C，但是答案是A，能解释一下为什么吗？</p>
+                    <div class="inline-buttons">
+                        <button class="button info small" onclick="showStudentPostDetail()">查看详情并回复</button>
+                        <button class="button default small" onclick="alert('编辑自己的帖子')">编辑</button>
+                    </div>
+                    <div id="student-post-detail" style="display:none; margin-top:10px;">
+                        <div class="discussion-reply">
+                            <p><span class="reply-author">张老师：</span>刘同学你好，这道题考察的是XX知识点，选项A的解释是YYY，而选项C的错误在于ZZZ。希望这个解释对你有帮助。</p>
+                        </div>
+                        <div class="discussion-reply">
+                            <p><span class="reply-author">王同学：</span>哦，原来是这样，我也做错了，谢谢老师解答！</p>
+                        </div>
+                        <textarea placeholder="输入您的回复..." style="width:100%; min-height:60px; margin-top:10px;" class="form-group"></textarea>
+                        <button class="button success small">提交回复</button>
+                    </div>
+                </div>
+                 <div class="discussion-post">
+                    <h5>期中复习资料分享</h5>
+                    <p class="post-meta"><strong>作者：</strong> 张老师 &nbsp;&nbsp; <strong>最后回复：</strong> 王同学 (2025-05-07 11:00)</p>
+                    <p>内容：同学们，这是我整理的期中复习重点，请大家下载查看。</p>
+                     <div class="inline-buttons">
+                        <button class="button info small" onclick="showStudentPostDetail()">查看详情并回复</button>
+                    </div>
+                </div>
+            </div>
+
+            <div id="student-profile" class="module">
+                <h3>个人信息</h3>
+                 <form>
+                    <div class="form-group">
+                        <label for="student-profile-name">姓名:</label>
+                        <input type="text" id="student-profile-name" value="李同学">
+                    </div>
+                    <div class="form-group">
+                        <label for="student-profile-email">邮箱:</label>
+                        <input type="email" id="student-profile-email" value="li@example.com">
+                    </div>
+                     <div class="form-group">
+                        <label for="student-profile-class">班级:</label>
+                        <input type="text" id="student-profile-class" value="高一（1）班" readonly>
+                    </div>
+                    <div class="form-group">
+                        <label for="student-profile-new-password">修改密码:</label>
+                        <input type="password" id="student-profile-new-password" placeholder="输入新密码">
+                    </div>
+                    <div class="form-group">
+                        <label for="student-profile-confirm-password">确认新密码:</label>
+                        <input type="password" id="student-profile-confirm-password" placeholder="再次输入新密码">
+                    </div>
+                    <button type="submit" class="button">更新信息</button>
+                </form>
+            </div>
+        </section>
+
+    </div>
+
+    <footer class="main-footer">
+        <p>&copy; 2025 在线作业系统 (优化版)</p>
+    </footer>
+
+<script>
+    // Helper to toggle active link in role-nav
+    function setActiveLink(navSelector, clickedLink) {
+        const navLinks = document.querySelectorAll(`${navSelector} a`);
+        navLinks.forEach(link => link.classList.remove('active-link'));
+        clickedLink.classList.add('active-link');
+    }
+
+    // Add event listeners to role-nav links for active state
+    document.querySelectorAll('.role-nav ul li a').forEach(link => {
+        link.addEventListener('click', function(e) {
+            const parentNav = this.closest('.role-nav');
+            if (parentNav) {
+                const navLinks = parentNav.querySelectorAll('a');
+                navLinks.forEach(lnk => lnk.classList.remove('active-link'));
+                this.classList.add('active-link');
+            }
+        });
+    });
+
+
+    // Admin scripts
+    function showAdminCreateUserForm() {
+        const form = document.getElementById('admin-create-user-form');
+        form.style.display = form.style.display === 'none' ? 'block' : 'none';
+    }
+    function showAdminCreateClassForm() {
+        const form = document.getElementById('admin-create-class-form');
+        form.style.display = form.style.display === 'none' ? 'block' : 'none';
+    }
+
+    // Teacher scripts
+    function showTeacherCreateAssignmentForm() {
+        const form = document.getElementById('teacher-create-assignment-form');
+        form.style.display = form.style.display === 'none' ? 'block' : 'none';
+    }
+    function addQuestion(type) {
+        const container = document.getElementById('questions-container');
+        const qCount = container.children.length + 1;
+        let qHtml = `<div class="question-block" id="q${qCount}"><h5>题目${qCount}: `;
+        if (type === 'choice') {
+            qHtml += `选择题</h5>
+                     <div class="form-group"><label>题干:</label><input type="text" placeholder="输入选择题题干"></div>
+                     <label>选项 (勾选正确答案):</label><br>
+                     <div style="margin-bottom:5px;"><input type="text" placeholder="选项A内容" style="width:80%; display:inline-block; margin-right:5px;"> <input type="checkbox" name="q${qCount}_correct_a"> 正确</div>
+                     <div style="margin-bottom:5px;"><input type="text" placeholder="选项B内容" style="width:80%; display:inline-block; margin-right:5px;"> <input type="checkbox" name="q${qCount}_correct_b"> 正确</div>
+                     <div style="margin-bottom:5px;"><input type="text" placeholder="选项C内容" style="width:80%; display:inline-block; margin-right:5px;"> <input type="checkbox" name="q${qCount}_correct_c"> 正确</div>
+                     <div style="margin-bottom:5px;"><input type="text" placeholder="选项D内容" style="width:80%; display:inline-block; margin-right:5px;"> <input type="checkbox" name="q${qCount}_correct_d"> 正确</div>`;
+        } else if (type === 'fill') {
+            qHtml += `填空题</h5>
+                     <div class="form-group"><label>题干 (用 ___ 表示填空处):</label><textarea placeholder="例如：中国的首都是 ___ 。"></textarea></div>
+                     <div class="form-group"><label>正确答案 (多个答案用逗号分隔):</label><input type="text" placeholder="北京"></div>`;
+        } else if (type === 'tf') {
+            qHtml += `判断题</h5>
+                     <div class="form-group"><label>题干:</label><input type="text" placeholder="输入判断题陈述句"></div>
+                     <label>正确答案:</label> <div><input type="radio" name="q${qCount}_tf" value="true" id="q${qCount}_true"> <label for="q${qCount}_true" style="font-weight:normal;">对</label></div>
+                                          <div><input type="radio" name="q${qCount}_tf" value="false" id="q${qCount}_false"> <label for="q${qCount}_false" style="font-weight:normal;">错</label></div>`;
+        } else if (type === 'short') {
+            qHtml += `简答题</h5>
+                     <div class="form-group"><label>题干:</label><textarea placeholder="输入简答题问题"></textarea></div>
+                     <p><small>此题型需教师手动评分。</small></p>`;
+        }
+        qHtml += `<button type="button" class="button danger small" style="margin-top:10px;" onclick="removeQuestion('q${qCount}')">删除此题</button></div>`;
+        container.insertAdjacentHTML('beforeend', qHtml);
+    }
+    function removeQuestion(questionId) {
+        const qElement = document.getElementById(questionId);
+        if (qElement) qElement.remove();
+    }
+
+    function showSubmissionsForGrading(assignmentId) {
+        const submissionList = document.getElementById('teacher-submission-list');
+        const gradingInterface = document.getElementById('teacher-grading-interface');
+        if (assignmentId) {
+            submissionList.style.display = 'block';
+            // In a real app, fetch and display actual submissions for assignmentId
+        } else {
+            submissionList.style.display = 'none';
+            gradingInterface.style.display = 'none';
+        }
+    }
+    function showGradingInterface(studentName, assignmentId) {
+        document.getElementById('grading-student-name').textContent = studentName;
+        document.getElementById('teacher-grading-interface').style.display = 'block';
+        // In a real app, load student's answers for assignmentId
+    }
+    function showTeacherNewPostForm() {
+        const form = document.getElementById('teacher-new-post-form');
+        form.style.display = form.style.display === 'none' ? 'block' : 'none';
+    }
+    function showTeacherPostDetail() {
+        const detailView = document.getElementById('teacher-post-detail');
+        detailView.style.display = detailView.style.display === 'none' ? 'block' : 'none';
+    }
+
+
+    // Student scripts
+    function showStudentAssignmentDetail(assignmentId, assignmentTitle) {
+        document.getElementById('student-assignment-title-display').textContent = `作业详情: ${assignmentTitle}`;
+        document.getElementById('student-assignment-detail').style.display = 'block';
+        document.getElementById('student-submitted-detail').style.display = 'none';
+        // In a real app, load assignment questions for assignmentId
+    }
+    function showStudentSubmittedDetail(assignmentId, assignmentTitle) {
+        document.getElementById('student-submitted-title-display').textContent = `已提交作业: ${assignmentTitle}`;
+        const submittedDetailView = document.getElementById('student-submitted-detail');
+        submittedDetailView.style.display = 'block';
+        document.getElementById('student-assignment-detail').style.display = 'none';
+        
+        // Example of showing immediate feedback for objective, and placeholder for subjective
+        document.getElementById('q1-feedback').innerHTML = ' (系统判定: <span style="color:var(--success-color);">正确</span>)';
+        document.getElementById('q4-feedback').innerHTML = ' (待教师批改)';
+        document.getElementById('q4-teacher-comment').style.display = 'none';
+        document.getElementById('submitted-status-info').className = 'status-badge status-submitted';
+        document.getElementById('submitted-status-info').textContent = "待批改";
+        document.getElementById('submitted-total-score').textContent = "--";
+        document.getElementById('submitted-teacher-overall-comment-block').style.display = 'none';
+        document.getElementById('submitted-teacher-overall-comment').textContent = "--";
+    }
+
+    function showStudentGradedDetail(assignmentId, assignmentTitle, score, feedback) {
+        document.getElementById('student-submitted-title-display').textContent = `已批改作业: ${assignmentTitle}`;
+        const submittedDetailView = document.getElementById('student-submitted-detail');
+        submittedDetailView.style.display = 'block';
+        document.getElementById('student-assignment-detail').style.display = 'none';
+        
+        document.getElementById('q1-feedback').innerHTML = ' (得分: 5/5)';
+        document.getElementById('q4-feedback').innerHTML = ' (得分: 12/15)';
+        const q4Comment = document.getElementById('q4-teacher-comment');
+        q4Comment.innerHTML = '<strong style="color:var(--info-color);">教师评语:</strong> 这道简答题回答得很好，论点清晰。';
+        q4Comment.style.display = 'block';
+
+        document.getElementById('submitted-status-info').className = 'status-badge status-graded';
+        document.getElementById('submitted-status-info').textContent = "已批改";
+        document.getElementById('submitted-total-score').textContent = score;
+        const overallCommentBlock = document.getElementById('submitted-teacher-overall-comment-block');
+        document.getElementById('submitted-teacher-overall-comment').textContent = feedback;
+        overallCommentBlock.style.display = feedback ? 'block' : 'none';
+
+    }
+
+
+    function confirmSubmission() {
+        if (confirm('确认提交作业吗？提交后在截止日期前通常无法修改。')) {
+            alert('作业提交成功！客观题将自动显示初步反馈。');
+            document.getElementById('student-assignment-detail').style.display = 'none';
+            const titleText = document.getElementById('student-assignment-title-display').textContent.replace('作业详情: ', '');
+            showStudentSubmittedDetail('current_hw', titleText);
+        }
+    }
+    function showStudentNewPostForm() {
+        const form = document.getElementById('student-new-post-form');
+        form.style.display = form.style.display === 'none' ? 'block' : 'none';
+    }
+    function showStudentPostDetail() {
+        // This function would typically fetch post details and then show.
+        // For this prototype, we'll just toggle the example detail block.
+        const detailView = event.target.closest('.discussion-post').querySelector('#student-post-detail'); // More robust targeting
+        if (detailView) {
+             detailView.style.display = detailView.style.display === 'none' ? 'block' : 'none';
+        }
+    }
+
+</script>
+</body>
+</html>
