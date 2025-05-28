@@ -9,16 +9,7 @@ const docTemplate = `{
     "info": {
         "description": "{{escape .Description}}",
         "title": "{{.Title}}",
-        "termsOfService": "http://swagger.io/terms/",
-        "contact": {
-            "name": "API Support",
-            "url": "http://www.swagger.io/support",
-            "email": "support@swagger.io"
-        },
-        "license": {
-            "name": "Apache 2.0",
-            "url": "http://www.apache.org/licenses/LICENSE-2.0.html"
-        },
+        "contact": {},
         "version": "{{.Version}}"
     },
     "host": "{{.Host}}",
@@ -44,7 +35,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/service.AddClassRequest"
+                            "$ref": "#/definitions/service.CreateClassDTO"
                         }
                     }
                 ],
@@ -90,10 +81,9 @@ const docTemplate = `{
                     },
                     {
                         "type": "integer",
-                        "description": "每页数量",
+                        "description": "每页数量(默认20)",
                         "name": "page_size",
-                        "in": "query",
-                        "required": true
+                        "in": "query"
                     }
                 ],
                 "responses": {
@@ -138,7 +128,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/service.EditClassRequest"
+                            "$ref": "#/definitions/service.UpdateClassDTO"
                         }
                     }
                 ],
@@ -223,7 +213,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/service.UserLoginRequest"
+                            "$ref": "#/definitions/service.LoginUserDTO"
                         }
                     }
                 ],
@@ -269,7 +259,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/service.UserRegisterRequest"
+                            "$ref": "#/definitions/service.CreateUserDTO"
                         }
                     }
                 ],
@@ -313,13 +303,18 @@ const docTemplate = `{
                 }
             }
         },
-        "service.AddClassRequest": {
+        "service.CreateClassDTO": {
             "type": "object",
             "required": [
+                "code",
                 "name",
                 "teacher_id"
             ],
             "properties": {
+                "code": {
+                    "description": "班级代码",
+                    "type": "string"
+                },
                 "description": {
                     "description": "班级描述",
                     "type": "string"
@@ -334,14 +329,61 @@ const docTemplate = `{
                 }
             }
         },
-        "service.EditClassRequest": {
+        "service.CreateUserDTO": {
             "type": "object",
             "required": [
+                "name",
+                "password",
+                "student_id"
+            ],
+            "properties": {
+                "name": {
+                    "description": "用户名",
+                    "type": "string",
+                    "minLength": 2
+                },
+                "password": {
+                    "description": "密码",
+                    "type": "string",
+                    "minLength": 6
+                },
+                "student_id": {
+                    "description": "学号",
+                    "type": "string",
+                    "minLength": 5
+                }
+            }
+        },
+        "service.LoginUserDTO": {
+            "type": "object",
+            "required": [
+                "password",
+                "student_id"
+            ],
+            "properties": {
+                "password": {
+                    "description": "密码",
+                    "type": "string"
+                },
+                "student_id": {
+                    "description": "学号",
+                    "type": "string"
+                }
+            }
+        },
+        "service.UpdateClassDTO": {
+            "type": "object",
+            "required": [
+                "code",
                 "id",
                 "name",
                 "teacher_id"
             ],
             "properties": {
+                "code": {
+                    "description": "班级代码",
+                    "type": "string"
+                },
                 "description": {
                     "description": "班级描述",
                     "type": "string"
@@ -359,43 +401,6 @@ const docTemplate = `{
                     "type": "integer"
                 }
             }
-        },
-        "service.UserLoginRequest": {
-            "type": "object",
-            "required": [
-                "password",
-                "student_id"
-            ],
-            "properties": {
-                "password": {
-                    "type": "string"
-                },
-                "student_id": {
-                    "type": "string"
-                }
-            }
-        },
-        "service.UserRegisterRequest": {
-            "type": "object",
-            "required": [
-                "name",
-                "password",
-                "student_id"
-            ],
-            "properties": {
-                "name": {
-                    "type": "string",
-                    "minLength": 2
-                },
-                "password": {
-                    "type": "string",
-                    "minLength": 6
-                },
-                "student_id": {
-                    "type": "string",
-                    "minLength": 5
-                }
-            }
         }
     }
 }`
@@ -403,11 +408,11 @@ const docTemplate = `{
 // SwaggerInfo holds exported Swagger Info so clients can modify it
 var SwaggerInfo = &swag.Spec{
 	Version:          "1.0",
-	Host:             "localhost:8080",
+	Host:             "",
 	BasePath:         "/",
-	Schemes:          []string{"http"},
+	Schemes:          []string{},
 	Title:            "AI Course API",
-	Description:      "This is the API documentation for AI Course Management System",
+	Description:      "AI Course 后端 API 服务",
 	InfoInstanceName: "swagger",
 	SwaggerTemplate:  docTemplate,
 	LeftDelim:        "{{",

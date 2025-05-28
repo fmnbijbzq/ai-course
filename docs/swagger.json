@@ -1,24 +1,11 @@
 {
-    "schemes": [
-        "http"
-    ],
     "swagger": "2.0",
     "info": {
-        "description": "This is the API documentation for AI Course Management System",
+        "description": "AI Course 后端 API 服务",
         "title": "AI Course API",
-        "termsOfService": "http://swagger.io/terms/",
-        "contact": {
-            "name": "API Support",
-            "url": "http://www.swagger.io/support",
-            "email": "support@swagger.io"
-        },
-        "license": {
-            "name": "Apache 2.0",
-            "url": "http://www.apache.org/licenses/LICENSE-2.0.html"
-        },
+        "contact": {},
         "version": "1.0"
     },
-    "host": "localhost:8080",
     "basePath": "/",
     "paths": {
         "/class/add": {
@@ -41,7 +28,7 @@
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/service.AddClassRequest"
+                            "$ref": "#/definitions/service.CreateClassDTO"
                         }
                     }
                 ],
@@ -87,10 +74,9 @@
                     },
                     {
                         "type": "integer",
-                        "description": "每页数量",
+                        "description": "每页数量(默认20)",
                         "name": "page_size",
-                        "in": "query",
-                        "required": true
+                        "in": "query"
                     }
                 ],
                 "responses": {
@@ -135,7 +121,7 @@
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/service.EditClassRequest"
+                            "$ref": "#/definitions/service.UpdateClassDTO"
                         }
                     }
                 ],
@@ -220,7 +206,7 @@
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/service.UserLoginRequest"
+                            "$ref": "#/definitions/service.LoginUserDTO"
                         }
                     }
                 ],
@@ -266,7 +252,7 @@
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/service.UserRegisterRequest"
+                            "$ref": "#/definitions/service.CreateUserDTO"
                         }
                     }
                 ],
@@ -310,13 +296,18 @@
                 }
             }
         },
-        "service.AddClassRequest": {
+        "service.CreateClassDTO": {
             "type": "object",
             "required": [
+                "code",
                 "name",
                 "teacher_id"
             ],
             "properties": {
+                "code": {
+                    "description": "班级代码",
+                    "type": "string"
+                },
                 "description": {
                     "description": "班级描述",
                     "type": "string"
@@ -331,14 +322,61 @@
                 }
             }
         },
-        "service.EditClassRequest": {
+        "service.CreateUserDTO": {
             "type": "object",
             "required": [
+                "name",
+                "password",
+                "student_id"
+            ],
+            "properties": {
+                "name": {
+                    "description": "用户名",
+                    "type": "string",
+                    "minLength": 2
+                },
+                "password": {
+                    "description": "密码",
+                    "type": "string",
+                    "minLength": 6
+                },
+                "student_id": {
+                    "description": "学号",
+                    "type": "string",
+                    "minLength": 5
+                }
+            }
+        },
+        "service.LoginUserDTO": {
+            "type": "object",
+            "required": [
+                "password",
+                "student_id"
+            ],
+            "properties": {
+                "password": {
+                    "description": "密码",
+                    "type": "string"
+                },
+                "student_id": {
+                    "description": "学号",
+                    "type": "string"
+                }
+            }
+        },
+        "service.UpdateClassDTO": {
+            "type": "object",
+            "required": [
+                "code",
                 "id",
                 "name",
                 "teacher_id"
             ],
             "properties": {
+                "code": {
+                    "description": "班级代码",
+                    "type": "string"
+                },
                 "description": {
                     "description": "班级描述",
                     "type": "string"
@@ -354,43 +392,6 @@
                 "teacher_id": {
                     "description": "教师ID",
                     "type": "integer"
-                }
-            }
-        },
-        "service.UserLoginRequest": {
-            "type": "object",
-            "required": [
-                "password",
-                "student_id"
-            ],
-            "properties": {
-                "password": {
-                    "type": "string"
-                },
-                "student_id": {
-                    "type": "string"
-                }
-            }
-        },
-        "service.UserRegisterRequest": {
-            "type": "object",
-            "required": [
-                "name",
-                "password",
-                "student_id"
-            ],
-            "properties": {
-                "name": {
-                    "type": "string",
-                    "minLength": 2
-                },
-                "password": {
-                    "type": "string",
-                    "minLength": 6
-                },
-                "student_id": {
-                    "type": "string",
-                    "minLength": 5
                 }
             }
         }

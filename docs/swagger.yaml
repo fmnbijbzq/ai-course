@@ -11,8 +11,11 @@ definitions:
         description: 响应信息
         type: string
     type: object
-  service.AddClassRequest:
+  service.CreateClassDTO:
     properties:
+      code:
+        description: 班级代码
+        type: string
       description:
         description: 班级描述
         type: string
@@ -23,11 +26,46 @@ definitions:
         description: 教师ID
         type: integer
     required:
+    - code
     - name
     - teacher_id
     type: object
-  service.EditClassRequest:
+  service.CreateUserDTO:
     properties:
+      name:
+        description: 用户名
+        minLength: 2
+        type: string
+      password:
+        description: 密码
+        minLength: 6
+        type: string
+      student_id:
+        description: 学号
+        minLength: 5
+        type: string
+    required:
+    - name
+    - password
+    - student_id
+    type: object
+  service.LoginUserDTO:
+    properties:
+      password:
+        description: 密码
+        type: string
+      student_id:
+        description: 学号
+        type: string
+    required:
+    - password
+    - student_id
+    type: object
+  service.UpdateClassDTO:
+    properties:
+      code:
+        description: 班级代码
+        type: string
       description:
         description: 班级描述
         type: string
@@ -41,47 +79,14 @@ definitions:
         description: 教师ID
         type: integer
     required:
+    - code
     - id
     - name
     - teacher_id
     type: object
-  service.UserLoginRequest:
-    properties:
-      password:
-        type: string
-      student_id:
-        type: string
-    required:
-    - password
-    - student_id
-    type: object
-  service.UserRegisterRequest:
-    properties:
-      name:
-        minLength: 2
-        type: string
-      password:
-        minLength: 6
-        type: string
-      student_id:
-        minLength: 5
-        type: string
-    required:
-    - name
-    - password
-    - student_id
-    type: object
-host: localhost:8080
 info:
-  contact:
-    email: support@swagger.io
-    name: API Support
-    url: http://www.swagger.io/support
-  description: This is the API documentation for AI Course Management System
-  license:
-    name: Apache 2.0
-    url: http://www.apache.org/licenses/LICENSE-2.0.html
-  termsOfService: http://swagger.io/terms/
+  contact: {}
+  description: AI Course 后端 API 服务
   title: AI Course API
   version: "1.0"
 paths:
@@ -122,7 +127,7 @@ paths:
         name: request
         required: true
         schema:
-          $ref: '#/definitions/service.EditClassRequest'
+          $ref: '#/definitions/service.UpdateClassDTO'
       produces:
       - application/json
       responses:
@@ -152,7 +157,7 @@ paths:
         name: request
         required: true
         schema:
-          $ref: '#/definitions/service.AddClassRequest'
+          $ref: '#/definitions/service.CreateClassDTO'
       produces:
       - application/json
       responses:
@@ -180,10 +185,9 @@ paths:
         name: page
         required: true
         type: integer
-      - description: 每页数量
+      - description: 每页数量(默认20)
         in: query
         name: page_size
-        required: true
         type: integer
       produces:
       - application/json
@@ -214,7 +218,7 @@ paths:
         name: request
         required: true
         schema:
-          $ref: '#/definitions/service.UserLoginRequest'
+          $ref: '#/definitions/service.LoginUserDTO'
       produces:
       - application/json
       responses:
@@ -244,7 +248,7 @@ paths:
         name: request
         required: true
         schema:
-          $ref: '#/definitions/service.UserRegisterRequest'
+          $ref: '#/definitions/service.CreateUserDTO'
       produces:
       - application/json
       responses:
@@ -263,6 +267,4 @@ paths:
       summary: 用户注册
       tags:
       - 用户管理
-schemes:
-- http
 swagger: "2.0"

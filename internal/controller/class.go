@@ -29,7 +29,7 @@ func NewClassController(classService service.ClassService) *ClassController {
 // @Tags 班级管理
 // @Accept json
 // @Produce json
-// @Param request body service.AddClassRequest true "班级信息"
+// @Param request body service.CreateClassDTO true "班级信息"
 // @Success 200 {object} response.Response "添加成功"
 // @Failure 400 {object} response.Response "请求参数错误"
 // @Failure 500 {object} response.Response "服务器内部错误"
@@ -63,7 +63,7 @@ func (c *ClassController) Add(ctx *gin.Context) {
 // @Tags 班级管理
 // @Accept json
 // @Produce json
-// @Param request body service.EditClassRequest true "班级信息"
+// @Param request body service.UpdateClassDTO true "班级信息"
 // @Success 200 {object} response.Response "编辑成功"
 // @Failure 400 {object} response.Response "请求参数错误"
 // @Failure 500 {object} response.Response "服务器内部错误"

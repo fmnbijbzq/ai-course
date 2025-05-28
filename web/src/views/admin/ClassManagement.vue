@@ -113,7 +113,7 @@ onMounted(() => {
 
 const fetchClassList = async () => {
   try {
-    const data = await getClassList(pagination)
+    const { data } = await getClassList(pagination)
     if (data) {
       classList.value = data.list
       total.value = data.total

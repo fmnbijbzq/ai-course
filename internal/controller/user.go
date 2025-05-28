@@ -37,7 +37,7 @@ func (c *UserController) RegisterRoutes(r *gin.Engine) {
 // @Tags 用户管理
 // @Accept json
 // @Produce json
-// @Param request body service.UserRegisterRequest true "注册信息"
+// @Param request body service.CreateUserDTO true "注册信息"
 // @Success 200 {object} response.Response "注册成功"
 // @Failure 400 {object} response.Response "请求参数错误"
 // @Failure 500 {object} response.Response "服务器内部错误"
@@ -76,7 +76,7 @@ func (c *UserController) Register(ctx *gin.Context) {
 // @Tags 用户管理
 // @Accept json
 // @Produce json
-// @Param request body service.UserLoginRequest true "登录信息"
+// @Param request body service.LoginUserDTO true "登录信息"
 // @Success 200 {object} response.Response "登录成功"
 // @Failure 400 {object} response.Response "请求参数错误"
 // @Failure 401 {object} response.Response "认证失败"
