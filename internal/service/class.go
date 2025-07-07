@@ -17,7 +17,6 @@ var (
 
 // CreateClassDTO 创建班级的数据传输对象
 type CreateClassDTO struct {
-	Code        string `json:"code" binding:"required"`       // 班级代码
 	Name        string `json:"name" binding:"required"`       // 班级名称
 	Description string `json:"description"`                   // 班级描述
 	TeacherID   uint   `json:"teacher_id" binding:"required"` // 教师ID
@@ -86,16 +85,9 @@ func (s *classService) Create(ctx context.Context, dto *CreateClassDTO) error {
 		return err
 	}
 
-	// 检查班级代码是否已存在
-	existing, err := s.classRepo.FindByCode(ctx, dto.Code)
-	if err == nil && existing != nil {
-		return ErrClassCodeExists
-	}
-
 	// 创建班级实体
 	class := &model.Class{
-		Code:        dto.Code,
-		Name:        dto.Name,
+		ClassName:   dto.Name,
 		Description: dto.Description,
 		TeacherID:   dto.TeacherID,
 	}
@@ -120,17 +112,8 @@ func (s *classService) Update(ctx context.Context, dto *UpdateClassDTO) error {
 		return ErrClassNotFound
 	}
 
-	// 如果班级代码发生变化，检查新代码是否已存在
-	if existing.Code != dto.Code {
-		existingByCode, err := s.classRepo.FindByCode(ctx, dto.Code)
-		if err == nil && existingByCode != nil && existingByCode.ID != dto.ID {
-			return ErrClassCodeExists
-		}
-	}
-
 	// 更新班级信息
-	existing.Code = dto.Code
-	existing.Name = dto.Name
+	existing.ClassName = dto.Name
 	existing.Description = dto.Description
 	existing.TeacherID = dto.TeacherID
 
@@ -194,9 +177,6 @@ func (s *classService) validateCreateDTO(dto *CreateClassDTO) error {
 	if dto == nil {
 		return errors.New("班级信息不能为空")
 	}
-	if dto.Code == "" {
-		return ErrInvalidClassCode
-	}
 	if dto.Name == "" {
 		return ErrInvalidClassName
 	}
@@ -221,8 +201,7 @@ func (s *classService) validateUpdateDTO(dto *UpdateClassDTO) error {
 func (s *classService) toClassResponse(class *model.Class) *ClassResponse {
 	return &ClassResponse{
 		ID:          class.ID,
-		Code:        class.Code,
-		Name:        class.Name,
+		Name:        class.ClassName,
 		Description: class.Description,
 		TeacherID:   class.TeacherID,
 	}

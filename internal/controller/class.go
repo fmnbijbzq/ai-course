@@ -33,7 +33,7 @@ func NewClassController(classService service.ClassService) *ClassController {
 // @Success 200 {object} response.Response "添加成功"
 // @Failure 400 {object} response.Response "请求参数错误"
 // @Failure 500 {object} response.Response "服务器内部错误"
-// @Router /class/add [post]
+// @Router /api/class/add [post]
 func (c *ClassController) Add(ctx *gin.Context) {
 	c.InitHandler(ctx)
 	var req service.CreateClassDTO
@@ -67,7 +67,7 @@ func (c *ClassController) Add(ctx *gin.Context) {
 // @Success 200 {object} response.Response "编辑成功"
 // @Failure 400 {object} response.Response "请求参数错误"
 // @Failure 500 {object} response.Response "服务器内部错误"
-// @Router /class/{id} [put]
+// @Router /api/class/{id} [put]
 func (c *ClassController) Edit(ctx *gin.Context) {
 	c.InitHandler(ctx)
 	var req service.UpdateClassDTO
@@ -100,7 +100,7 @@ func (c *ClassController) Edit(ctx *gin.Context) {
 // @Success 200 {object} response.Response "删除成功"
 // @Failure 400 {object} response.Response "请求参数错误"
 // @Failure 500 {object} response.Response "服务器内部错误"
-// @Router /class/{id} [delete]
+// @Router /api/class/{id} [delete]
 func (c *ClassController) Delete(ctx *gin.Context) {
 	c.InitHandler(ctx)
 	idStr := ctx.Param("id")
@@ -132,7 +132,7 @@ func (c *ClassController) Delete(ctx *gin.Context) {
 // @Success 200 {object} response.Response "获取成功"
 // @Failure 400 {object} response.Response "请求参数错误"
 // @Failure 500 {object} response.Response "服务器内部错误"
-// @Router /class/list [get]
+// @Router /api/class/list [get]
 func (c *ClassController) List(ctx *gin.Context) {
 	c.InitHandler(ctx)
 	var req service.ClassListRequest

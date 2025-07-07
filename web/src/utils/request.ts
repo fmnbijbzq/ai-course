@@ -3,7 +3,7 @@ import type { AxiosInstance, InternalAxiosRequestConfig, AxiosResponse } from 'a
 import { ElMessage } from 'element-plus'
 
 interface ApiResponse<T = any> {
-  code?: number
+  code: number
   message: string
   data: T
 }
@@ -56,7 +56,7 @@ service.interceptors.request.use(
 )
 
 service.interceptors.response.use(
-  (response: AxiosResponse<ApiResponse>) => {
+  (response: AxiosResponse<ApiResponse<any>>) => {
     const data = response.data
     
     // 检查响应数据结构
@@ -66,12 +66,12 @@ service.interceptors.response.use(
     }
 
     // 检查业务状态码
-    if (data.code !== undefined && data.code !== 0) {
+    if (data.code !== undefined && data.code !== 200) {
       console.error('业务状态码错误:', data)
       return Promise.reject(new Error(data.message || '请求失败'))
     }
 
-    // 如果是登录或注册接口
+    // 如果是登录或注册接口，返回完整的data结构
     if (response.config.url?.includes('/user/login') || response.config.url?.includes('/user/register')) {
       const responseData = data.data
       
@@ -88,6 +88,9 @@ service.interceptors.response.use(
         console.error('缺少 user:', responseData)
         return Promise.reject(new Error('响应数据结构不正确: 缺少 user'))
       }
+      
+      // 返回完整的响应，因为登录页面需要访问data.user和data.token
+      return data
     }
 
     // 对于修改操作，显示成功消息
@@ -99,8 +102,8 @@ service.interceptors.response.use(
       })
     }
 
-    // 只返回响应数据中的 data 字段
-    return data.data
+    // 返回data部分，而不是整个响应
+    return data.data || data
   },
   (error) => {
     console.error('Response Error:', error)

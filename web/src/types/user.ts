@@ -17,13 +17,19 @@ export interface User {
 }
 
 export interface LoginResponse {
+  code: number
   message: string
-  user: User
-  token: string
+  data: {
+    user: User
+    token: string
+  }
 }
 
 export interface RegisterResponse {
+  code: number
   message: string
-  user: User
-  token: string
+  data: {
+    user: User
+    token: string
+  }
 }

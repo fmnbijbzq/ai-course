@@ -1,13 +1,11 @@
 export interface Class {
   id: number
-  code: string
   name: string
   description: string
   teacher_id: number
 }
 
 export interface ClassAddRequest {
-  code: string
   name: string
   description?: string
   teacher_id: number
@@ -15,7 +13,6 @@ export interface ClassAddRequest {
 
 export interface ClassEditRequest {
   id: number
-  code: string
   name: string
   description?: string
   teacher_id: number
@@ -30,16 +27,15 @@ export interface ApiResponse<T> {
 export interface PaginationData {
   list: Class[]
   total: number
+  page: number
+  page_size: number
 }
 
 export interface ClassListResponse {
-  code: number
-  message: string
-  data: PaginationData
+  list: Class[]
+  total: number
+  page: number
+  page_size: number
 }
 
-export interface ClassResponse {
-  code: number
-  message: string
-  data: Class
-}
+export interface ClassResponse extends ApiResponse<Class> {}

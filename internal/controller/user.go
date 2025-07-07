@@ -41,7 +41,7 @@ func (c *UserController) RegisterRoutes(r *gin.Engine) {
 // @Success 200 {object} response.Response "注册成功"
 // @Failure 400 {object} response.Response "请求参数错误"
 // @Failure 500 {object} response.Response "服务器内部错误"
-// @Router /user/register [post]
+// @Router /api/user/register [post]
 func (c *UserController) Register(ctx *gin.Context) {
 	c.InitHandler(ctx)
 	var req service.CreateUserDTO
@@ -80,7 +80,7 @@ func (c *UserController) Register(ctx *gin.Context) {
 // @Success 200 {object} response.Response "登录成功"
 // @Failure 400 {object} response.Response "请求参数错误"
 // @Failure 401 {object} response.Response "认证失败"
-// @Router /user/login [post]
+// @Router /api/user/login [post]
 func (c *UserController) Login(ctx *gin.Context) {
 	c.InitHandler(ctx)
 	var req service.LoginUserDTO
@@ -106,5 +106,5 @@ func (c *UserController) Login(ctx *gin.Context) {
 		zap.String("student_id", req.StudentID),
 	)
 
-	c.SuccessWithMessage("登录成功", resp)
+	c.Success(resp)
 }

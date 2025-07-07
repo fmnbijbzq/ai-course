@@ -55,6 +55,7 @@ import { ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { useUserStore } from '@/store/user'
 import { getClassList } from '@/api/class'
+import type { ClassListResponse } from '@/types/class'
 import { School } from '@element-plus/icons-vue'
 
 const router = useRouter()
@@ -63,8 +64,8 @@ const classCount = ref(0)
 
 onMounted(async () => {
   try {
-    const res = await getClassList({ page: 1, page_size: 1 })
-    classCount.value = res.data.total
+    const res = await getClassList({ page: 1, page_size: 1 }) as any
+    classCount.value = res.total || 0
   } catch (error) {
     console.error('Failed to fetch class count:', error)
   }

@@ -13,9 +13,6 @@ definitions:
     type: object
   service.CreateClassDTO:
     properties:
-      code:
-        description: 班级代码
-        type: string
       description:
         description: 班级描述
         type: string
@@ -26,7 +23,6 @@ definitions:
         description: 教师ID
         type: integer
     required:
-    - code
     - name
     - teacher_id
     type: object
@@ -90,7 +86,7 @@ info:
   title: AI Course API
   version: "1.0"
 paths:
-  /class/{id}:
+  /api/class/{id}:
     delete:
       description: 删除现有班级
       parameters:
@@ -146,7 +142,7 @@ paths:
       summary: 编辑班级
       tags:
       - 班级管理
-  /class/add:
+  /api/class/add:
     post:
       consumes:
       - application/json
@@ -176,7 +172,7 @@ paths:
       summary: 添加班级
       tags:
       - 班级管理
-  /class/list:
+  /api/class/list:
     get:
       description: 分页获取班级列表
       parameters:
@@ -207,7 +203,7 @@ paths:
       summary: 获取班级列表
       tags:
       - 班级管理
-  /user/login:
+  /api/user/login:
     post:
       consumes:
       - application/json
@@ -237,7 +233,7 @@ paths:
       summary: 用户登录
       tags:
       - 用户管理
-  /user/register:
+  /api/user/register:
     post:
       consumes:
       - application/json

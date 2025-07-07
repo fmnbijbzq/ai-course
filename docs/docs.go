@@ -15,7 +15,7 @@ const docTemplate = `{
     "host": "{{.Host}}",
     "basePath": "{{.BasePath}}",
     "paths": {
-        "/class/add": {
+        "/api/class/add": {
             "post": {
                 "description": "添加新班级",
                 "consumes": [
@@ -61,7 +61,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/class/list": {
+        "/api/class/list": {
             "get": {
                 "description": "分页获取班级列表",
                 "produces": [
@@ -108,7 +108,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/class/{id}": {
+        "/api/class/{id}": {
             "put": {
                 "description": "编辑现有班级",
                 "consumes": [
@@ -193,7 +193,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/user/login": {
+        "/api/user/login": {
             "post": {
                 "description": "用户登录系统",
                 "consumes": [
@@ -239,7 +239,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/user/register": {
+        "/api/user/register": {
             "post": {
                 "description": "注册新用户",
                 "consumes": [
@@ -306,15 +306,10 @@ const docTemplate = `{
         "service.CreateClassDTO": {
             "type": "object",
             "required": [
-                "code",
                 "name",
                 "teacher_id"
             ],
             "properties": {
-                "code": {
-                    "description": "班级代码",
-                    "type": "string"
-                },
                 "description": {
                     "description": "班级描述",
                     "type": "string"

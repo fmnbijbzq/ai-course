@@ -3,6 +3,7 @@ package service
 import (
 	"ai-course/internal/model"
 	"ai-course/internal/repository"
+	"ai-course/internal/utils"
 	"context"
 	"errors"
 
@@ -45,6 +46,12 @@ type UserResponse struct {
 	Name      string `json:"name"`
 }
 
+// LoginResponse 登录响应对象
+type LoginResponse struct {
+	User  *UserResponse `json:"user"`
+	Token string        `json:"token"`
+}
+
 // UserListResponse 用户列表响应对象
 type UserListResponse struct {
 	Total int64          `json:"total"`
@@ -56,7 +63,7 @@ type UserService interface {
 	// Register 用户注册
 	Register(ctx context.Context, dto *CreateUserDTO) error
 	// Login 用户登录
-	Login(ctx context.Context, dto *LoginUserDTO) (*UserResponse, error)
+	Login(ctx context.Context, dto *LoginUserDTO) (*LoginResponse, error)
 	// Update 更新用户信息
 	Update(ctx context.Context, dto *UpdateUserDTO) error
 	// Delete 删除用户
@@ -102,16 +109,16 @@ func (s *userService) Register(ctx context.Context, dto *CreateUserDTO) error {
 
 	// 创建用户实体
 	user := &model.User{
-		StudentID: dto.StudentID,
-		Name:      dto.Name,
-		Password:  string(hashedPassword),
+		Code:     dto.StudentID,
+		Name:     dto.Name,
+		Password: string(hashedPassword),
 	}
 
 	return s.userRepo.Create(ctx, user)
 }
 
 // Login 用户登录
-func (s *userService) Login(ctx context.Context, dto *LoginUserDTO) (*UserResponse, error) {
+func (s *userService) Login(ctx context.Context, dto *LoginUserDTO) (*LoginResponse, error) {
 	// 根据学号查找用户
 	user, err := s.userRepo.FindByStudentID(ctx, dto.StudentID)
 	if err != nil {
@@ -126,7 +133,17 @@ func (s *userService) Login(ctx context.Context, dto *LoginUserDTO) (*UserRespon
 		return nil, ErrInvalidCredentials
 	}
 
-	return s.toUserResponse(user), nil
+	// 生成JWT token
+	token, err := utils.GenerateToken(user.ID, user.Code)
+	if err != nil {
+		return nil, err
+	}
+
+	// 构造响应
+	return &LoginResponse{
+		User:  s.toUserResponse(user),
+		Token: token,
+	}, nil
 }
 
 // Update 更新用户信息
@@ -146,7 +163,7 @@ func (s *userService) Update(ctx context.Context, dto *UpdateUserDTO) error {
 	}
 
 	// 如果学号发生变化，检查新学号是否已存在
-	if existing.StudentID != dto.StudentID {
+	if existing.Code != dto.StudentID {
 		existingByStudentID, err := s.userRepo.FindByStudentID(ctx, dto.StudentID)
 		if err == nil && existingByStudentID != nil && existingByStudentID.ID != dto.ID {
 			return ErrUserAlreadyExists
@@ -154,7 +171,7 @@ func (s *userService) Update(ctx context.Context, dto *UpdateUserDTO) error {
 	}
 
 	// 更新用户信息
-	existing.StudentID = dto.StudentID
+	existing.Code = dto.StudentID
 	existing.Name = dto.Name
 
 	return s.userRepo.Update(ctx, existing)
@@ -243,7 +260,7 @@ func (s *userService) validateUpdateDTO(dto *UpdateUserDTO) error {
 func (s *userService) toUserResponse(user *model.User) *UserResponse {
 	return &UserResponse{
 		ID:        user.ID,
-		StudentID: user.StudentID,
+		StudentID: user.Code,
 		Name:      user.Name,
 	}
 }

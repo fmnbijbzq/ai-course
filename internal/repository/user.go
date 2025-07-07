@@ -78,7 +78,7 @@ func (r *userRepository) Update(ctx context.Context, user *model.User) error {
 
 	// 删除缓存
 	if r.cache != nil {
-		cacheKey := fmt.Sprintf("user:student_id:%s", user.StudentID)
+		cacheKey := fmt.Sprintf("user:student_id:%s", user.Code)
 		r.cache.Delete(ctx, cacheKey)
 	}
 
@@ -98,7 +98,7 @@ func (r *userRepository) Delete(ctx context.Context, id uint) error {
 
 	// 删除缓存
 	if r.cache != nil {
-		cacheKey := fmt.Sprintf("user:student_id:%s", user.StudentID)
+		cacheKey := fmt.Sprintf("user:student_id:%s", user.Code)
 		r.cache.Delete(ctx, cacheKey)
 	}
 

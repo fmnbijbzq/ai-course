@@ -7,10 +7,8 @@
 
     <el-table :data="classList" border style="width: 100%">
       <el-table-column prop="id" label="ID" width="80" />
-      <el-table-column prop="code" label="班级代码" width="120" />
       <el-table-column prop="name" label="班级名称" />
       <el-table-column prop="description" label="班级描述" />
-      <el-table-column prop="teacher_id" label="教师ID" width="100" />
       <el-table-column label="操作" width="180">
         <template #default="scope">
           <el-button size="small" @click="handleEdit(scope.row)">编辑</el-button>
@@ -35,17 +33,11 @@
       width="30%"
     >
       <el-form :model="form" :rules="rules" ref="formRef" label-width="100px">
-        <el-form-item label="班级代码" prop="code">
-          <el-input v-model="form.code" placeholder="请输入班级代码" />
-        </el-form-item>
         <el-form-item label="班级名称" prop="name">
           <el-input v-model="form.name" placeholder="请输入班级名称" />
         </el-form-item>
         <el-form-item label="班级描述" prop="description">
           <el-input v-model="form.description" type="textarea" placeholder="请输入班级描述" />
-        </el-form-item>
-        <el-form-item label="教师ID" prop="teacher_id">
-          <el-input v-model.number="form.teacher_id" type="number" placeholder="请输入教师ID" />
         </el-form-item>
       </el-form>
 
@@ -71,6 +63,7 @@ import type {
   Class,
   ClassAddRequest,
   ClassEditRequest,
+  ClassListResponse,
   PaginationData
 } from '@/types/class'
 
@@ -86,24 +79,15 @@ const formRef = ref<FormInstance>()
 const currentId = ref<number | null>(null)
 
 const form = reactive<ClassAddRequest>({
-  code: '',
   name: '',
   description: '',
   teacher_id: 0
 })
 
 const rules = {
-  code: [
-    { required: true, message: '请输入班级代码', trigger: 'blur' },
-    { min: 2, max: 20, message: '长度在 2 到 20 个字符', trigger: 'blur' }
-  ],
   name: [
     { required: true, message: '请输入班级名称', trigger: 'blur' },
     { min: 2, max: 50, message: '长度在 2 到 50 个字符', trigger: 'blur' }
-  ],
-  teacher_id: [
-    { required: true, message: '请输入教师ID', trigger: 'blur' },
-    { type: 'number', min: 1, message: '教师ID必须大于0', trigger: 'blur' }
   ]
 }
 
@@ -113,10 +97,10 @@ onMounted(() => {
 
 const fetchClassList = async () => {
   try {
-    const { data } = await getClassList(pagination)
-    if (data) {
-      classList.value = data.list
-      total.value = data.total
+    const response = await getClassList(pagination) as any
+    if (response && response.list) {
+      classList.value = response.list
+      total.value = response.total
     } else {
       ElMessage.error('获取班级列表失败：数据格式错误')
     }
@@ -134,7 +118,6 @@ const handleSizeChange = () => {
 const showAddDialog = () => {
   dialogTitle.value = '添加班级'
   currentId.value = null
-  form.code = ''
   form.name = ''
   form.description = ''
   form.teacher_id = 0
@@ -144,7 +127,6 @@ const showAddDialog = () => {
 const handleEdit = (row: Class) => {
   dialogTitle.value = '编辑班级'
   currentId.value = row.id
-  form.code = row.code
   form.name = row.name
   form.description = row.description
   form.teacher_id = row.teacher_id
@@ -179,7 +161,6 @@ const submitForm = async () => {
       // 编辑班级
       await editClass(currentId.value, {
         id: currentId.value,
-        code: form.code,
         name: form.name,
         description: form.description,
         teacher_id: form.teacher_id

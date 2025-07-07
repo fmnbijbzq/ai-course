@@ -81,13 +81,14 @@ const handleSubmit = async () => {
         const res = await login(loginForm)
         console.log('Login response:', res)
 
-        if (!res.token || !res.user) {
+        // 后端返回的结构是 { code, message, data: { user, token } }
+        if (!res.data || !res.data.token || !res.data.user) {
           throw new Error('登录响应数据不完整')
         }
 
         // 先设置用户信息和令牌
-        userStore.setUser(res.user)
-        userStore.setToken(res.token)
+        userStore.setUser(res.data.user)
+        userStore.setToken(res.data.token)
 
         // 显示登录成功消息
         ElMessage.success('登录成功')

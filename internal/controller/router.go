@@ -72,7 +72,7 @@ func (r *Router) RegisterRoutes() {
 
 	// 用户路由组
 	userController := NewUserController(r.userService)
-	userGroup := r.engine.Group("/user")
+	userGroup := r.engine.Group("/api/user")
 	{
 		userGroup.POST("/register", userController.Register)
 		userGroup.POST("/login", userController.Login)
@@ -80,7 +80,7 @@ func (r *Router) RegisterRoutes() {
 
 	// 班级路由组
 	classController := NewClassController(r.classService)
-	classGroup := r.engine.Group("/class")
+	classGroup := r.engine.Group("/api/class")
 	{
 		classGroup.POST("/add", classController.Add)
 		classGroup.PUT("/:id", classController.Edit)

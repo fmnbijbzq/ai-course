@@ -33,6 +33,10 @@
             <el-icon><reading /></el-icon>
             <span>班级管理</span>
           </el-menu-item>
+          <el-menu-item index="/app/profile">
+            <el-icon><user /></el-icon>
+            <span>个人信息</span>
+          </el-menu-item>
         </el-menu>
       </el-aside>
 
@@ -47,7 +51,7 @@
 import { ref, computed } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import { useUserStore } from '@/store/user'
-import { ArrowDown, Menu, Reading } from '@element-plus/icons-vue'
+import { ArrowDown, Menu, Reading, User } from '@element-plus/icons-vue'
 import { ElMessage } from 'element-plus'
 
 const router = useRouter()
@@ -59,7 +63,7 @@ const activeMenu = computed(() => route.path)
 const handleCommand = (command: string) => {
   switch (command) {
     case 'profile':
-      router.push('/profile')
+      router.push('/app/profile')
       break
     case 'logout':
       userStore.logout()

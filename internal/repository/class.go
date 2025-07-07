@@ -54,8 +54,6 @@ func (r *classRepository) Update(ctx context.Context, class *model.Class) error 
 	if r.cache != nil {
 		cacheKey := fmt.Sprintf("class:id:%d", class.ID)
 		r.cache.Delete(ctx, cacheKey)
-		cacheKey = fmt.Sprintf("class:code:%s", class.Code)
-		r.cache.Delete(ctx, cacheKey)
 	}
 
 	return nil
@@ -63,11 +61,6 @@ func (r *classRepository) Update(ctx context.Context, class *model.Class) error 
 
 // Delete 删除班级
 func (r *classRepository) Delete(ctx context.Context, id uint) error {
-	class, err := r.FindByID(ctx, id)
-	if err != nil {
-		return err
-	}
-
 	if err := r.db.WithContext(ctx).Delete(&model.Class{}, id); err != nil {
 		return err
 	}
@@ -75,8 +68,6 @@ func (r *classRepository) Delete(ctx context.Context, id uint) error {
 	// 删除缓存
 	if r.cache != nil {
 		cacheKey := fmt.Sprintf("class:id:%d", id)
-		r.cache.Delete(ctx, cacheKey)
-		cacheKey = fmt.Sprintf("class:code:%s", class.Code)
 		r.cache.Delete(ctx, cacheKey)
 	}
 

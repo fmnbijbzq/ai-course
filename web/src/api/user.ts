@@ -6,7 +6,7 @@ export const login = (data: LoginForm) => {
   // 使用 axios 直接发送 POST 请求，确保方法正确
   return request({
     method: 'POST',
-    url: '/user/login',
+    url: '/api/user/login',
     data
   }) as Promise<LoginResponse>
 }
@@ -16,7 +16,7 @@ export const register = (data: RegisterForm) => {
   // 使用 axios 直接发送 POST 请求，确保方法正确
   return request({
     method: 'POST',
-    url: '/user/register',
+    url: '/api/user/register',
     data
   }) as Promise<RegisterResponse>
 }
