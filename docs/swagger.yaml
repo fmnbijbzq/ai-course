@@ -1,5 +1,224 @@
 basePath: /
 definitions:
+  model.AnswerRequest:
+    properties:
+      content:
+        type: string
+      question_id:
+        type: integer
+    required:
+    - content
+    - question_id
+    type: object
+  model.BatchGradeItem:
+    properties:
+      answers:
+        items:
+          $ref: '#/definitions/model.GradeAnswerRequest'
+        type: array
+      overall_feedback:
+        type: string
+      submission_id:
+        type: integer
+    required:
+    - answers
+    - submission_id
+    type: object
+  model.BatchGradeRequest:
+    properties:
+      submissions:
+        items:
+          $ref: '#/definitions/model.BatchGradeItem'
+        type: array
+    required:
+    - submissions
+    type: object
+  model.CreateAssignmentRequest:
+    properties:
+      class_id:
+        type: integer
+      deadline:
+        type: string
+      description:
+        type: string
+      questions:
+        items:
+          $ref: '#/definitions/model.CreateQuestionRequest'
+        type: array
+      status:
+        enum:
+        - draft
+        - published
+        type: string
+      title:
+        maxLength: 200
+        type: string
+      total_score:
+        minimum: 1
+        type: integer
+    required:
+    - class_id
+    - deadline
+    - title
+    type: object
+  model.CreateQuestionRequest:
+    properties:
+      content:
+        type: string
+      correct_answer:
+        type: string
+      explanation:
+        type: string
+      is_multiple:
+        description: 选择题是否多选
+        type: boolean
+      options:
+        items:
+          $ref: '#/definitions/model.QuestionOption'
+        type: array
+      order:
+        minimum: 1
+        type: integer
+      reference:
+        type: string
+      score:
+        minimum: 1
+        type: integer
+      type:
+        allOf:
+        - $ref: '#/definitions/model.QuestionType'
+        enum:
+        - choice
+        - fill_blank
+        - true_false
+        - essay
+    required:
+    - content
+    - order
+    - score
+    - type
+    type: object
+  model.GradeAnswerRequest:
+    properties:
+      feedback:
+        type: string
+      question_id:
+        type: integer
+      score:
+        minimum: 0
+        type: integer
+    required:
+    - question_id
+    type: object
+  model.GradeSubmissionRequest:
+    properties:
+      answers:
+        items:
+          $ref: '#/definitions/model.GradeAnswerRequest'
+        type: array
+      overall_feedback:
+        type: string
+    required:
+    - answers
+    type: object
+  model.QuestionOption:
+    properties:
+      key:
+        description: 选项标识 A, B, C, D
+        type: string
+      value:
+        description: 选项内容
+        type: string
+    type: object
+  model.QuestionType:
+    enum:
+    - choice
+    - fill_blank
+    - true_false
+    - essay
+    type: string
+    x-enum-comments:
+      QuestionTypeChoice: 选择题
+      QuestionTypeEssay: 简答题
+      QuestionTypeFillBlank: 填空题
+      QuestionTypeTrueFalse: 判断题
+    x-enum-varnames:
+    - QuestionTypeChoice
+    - QuestionTypeFillBlank
+    - QuestionTypeTrueFalse
+    - QuestionTypeEssay
+  model.SubmissionRequest:
+    properties:
+      answers:
+        items:
+          $ref: '#/definitions/model.AnswerRequest'
+        type: array
+      assignment_id:
+        type: integer
+      status:
+        allOf:
+        - $ref: '#/definitions/model.SubmissionStatus'
+        enum:
+        - draft
+        - submitted
+    required:
+    - answers
+    - assignment_id
+    type: object
+  model.SubmissionStatus:
+    enum:
+    - draft
+    - submitted
+    - graded
+    type: string
+    x-enum-comments:
+      SubmissionStatusDraft: 草稿
+      SubmissionStatusGraded: 已批改
+      SubmissionStatusSubmitted: 已提交
+    x-enum-varnames:
+    - SubmissionStatusDraft
+    - SubmissionStatusSubmitted
+    - SubmissionStatusGraded
+  model.UpdateAssignmentRequest:
+    properties:
+      deadline:
+        type: string
+      description:
+        type: string
+      status:
+        enum:
+        - draft
+        - published
+        - closed
+        type: string
+      title:
+        maxLength: 200
+        type: string
+      total_score:
+        minimum: 1
+        type: integer
+    type: object
+  model.UpdateQuestionRequest:
+    properties:
+      content:
+        type: string
+      correct_answer:
+        type: string
+      explanation:
+        type: string
+      options:
+        items:
+          $ref: '#/definitions/model.QuestionOption'
+        type: array
+      order:
+        minimum: 1
+        type: integer
+      reference:
+        type: string
+      score:
+        minimum: 1
+        type: integer
+    type: object
   response.Response:
     properties:
       code:
@@ -86,6 +305,622 @@ info:
   title: AI Course API
   version: "1.0"
 paths:
+  /api/assignment:
+    post:
+      consumes:
+      - application/json
+      description: 教师创建新作业
+      parameters:
+      - description: 作业信息
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/model.CreateAssignmentRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 创建成功
+          schema:
+            $ref: '#/definitions/response.Response'
+        "400":
+          description: 请求参数错误
+          schema:
+            $ref: '#/definitions/response.Response'
+        "401":
+          description: 未授权
+          schema:
+            $ref: '#/definitions/response.Response'
+        "500":
+          description: 服务器内部错误
+          schema:
+            $ref: '#/definitions/response.Response'
+      summary: 创建作业
+      tags:
+      - 作业管理
+  /api/assignment/{assignment_id}/question:
+    get:
+      description: 获取指定作业的所有题目
+      parameters:
+      - description: 作业ID
+        in: path
+        name: assignment_id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 获取成功
+          schema:
+            $ref: '#/definitions/response.Response'
+        "400":
+          description: 请求参数错误
+          schema:
+            $ref: '#/definitions/response.Response'
+        "404":
+          description: 作业不存在
+          schema:
+            $ref: '#/definitions/response.Response'
+        "500":
+          description: 服务器内部错误
+          schema:
+            $ref: '#/definitions/response.Response'
+      summary: 获取作业题目列表
+      tags:
+      - 题目管理
+    post:
+      consumes:
+      - application/json
+      description: 教师为指定作业添加题目
+      parameters:
+      - description: 作业ID
+        in: path
+        name: assignment_id
+        required: true
+        type: integer
+      - description: 题目信息
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/model.CreateQuestionRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 添加成功
+          schema:
+            $ref: '#/definitions/response.Response'
+        "400":
+          description: 请求参数错误
+          schema:
+            $ref: '#/definitions/response.Response'
+        "401":
+          description: 未授权
+          schema:
+            $ref: '#/definitions/response.Response'
+        "403":
+          description: 无权限
+          schema:
+            $ref: '#/definitions/response.Response'
+        "404":
+          description: 作业不存在
+          schema:
+            $ref: '#/definitions/response.Response'
+        "500":
+          description: 服务器内部错误
+          schema:
+            $ref: '#/definitions/response.Response'
+      summary: 为作业添加题目
+      tags:
+      - 题目管理
+  /api/assignment/{assignment_id}/question/{question_id}:
+    delete:
+      description: 教师删除题目
+      parameters:
+      - description: 作业ID
+        in: path
+        name: assignment_id
+        required: true
+        type: integer
+      - description: 题目ID
+        in: path
+        name: question_id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 删除成功
+          schema:
+            $ref: '#/definitions/response.Response'
+        "400":
+          description: 请求参数错误
+          schema:
+            $ref: '#/definitions/response.Response'
+        "401":
+          description: 未授权
+          schema:
+            $ref: '#/definitions/response.Response'
+        "403":
+          description: 无权限
+          schema:
+            $ref: '#/definitions/response.Response'
+        "404":
+          description: 题目不存在
+          schema:
+            $ref: '#/definitions/response.Response'
+        "500":
+          description: 服务器内部错误
+          schema:
+            $ref: '#/definitions/response.Response'
+      summary: 删除题目
+      tags:
+      - 题目管理
+    put:
+      consumes:
+      - application/json
+      description: 教师更新题目信息
+      parameters:
+      - description: 作业ID
+        in: path
+        name: assignment_id
+        required: true
+        type: integer
+      - description: 题目ID
+        in: path
+        name: question_id
+        required: true
+        type: integer
+      - description: 题目信息
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/model.UpdateQuestionRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 更新成功
+          schema:
+            $ref: '#/definitions/response.Response'
+        "400":
+          description: 请求参数错误
+          schema:
+            $ref: '#/definitions/response.Response'
+        "401":
+          description: 未授权
+          schema:
+            $ref: '#/definitions/response.Response'
+        "403":
+          description: 无权限
+          schema:
+            $ref: '#/definitions/response.Response'
+        "404":
+          description: 题目不存在
+          schema:
+            $ref: '#/definitions/response.Response'
+        "500":
+          description: 服务器内部错误
+          schema:
+            $ref: '#/definitions/response.Response'
+      summary: 更新题目
+      tags:
+      - 题目管理
+  /api/assignment/{id}:
+    delete:
+      description: 教师删除作业
+      parameters:
+      - description: 作业ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 删除成功
+          schema:
+            $ref: '#/definitions/response.Response'
+        "400":
+          description: 请求参数错误
+          schema:
+            $ref: '#/definitions/response.Response'
+        "401":
+          description: 未授权
+          schema:
+            $ref: '#/definitions/response.Response'
+        "403":
+          description: 无权限
+          schema:
+            $ref: '#/definitions/response.Response'
+        "404":
+          description: 作业不存在
+          schema:
+            $ref: '#/definitions/response.Response'
+        "500":
+          description: 服务器内部错误
+          schema:
+            $ref: '#/definitions/response.Response'
+      summary: 删除作业
+      tags:
+      - 作业管理
+    get:
+      description: 获取作业详细信息
+      parameters:
+      - description: 作业ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 获取成功
+          schema:
+            $ref: '#/definitions/response.Response'
+        "400":
+          description: 请求参数错误
+          schema:
+            $ref: '#/definitions/response.Response'
+        "404":
+          description: 作业不存在
+          schema:
+            $ref: '#/definitions/response.Response'
+        "500":
+          description: 服务器内部错误
+          schema:
+            $ref: '#/definitions/response.Response'
+      summary: 获取作业详情
+      tags:
+      - 作业管理
+    put:
+      consumes:
+      - application/json
+      description: 教师更新作业信息
+      parameters:
+      - description: 作业ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: 作业信息
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/model.UpdateAssignmentRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 更新成功
+          schema:
+            $ref: '#/definitions/response.Response'
+        "400":
+          description: 请求参数错误
+          schema:
+            $ref: '#/definitions/response.Response'
+        "401":
+          description: 未授权
+          schema:
+            $ref: '#/definitions/response.Response'
+        "403":
+          description: 无权限
+          schema:
+            $ref: '#/definitions/response.Response'
+        "404":
+          description: 作业不存在
+          schema:
+            $ref: '#/definitions/response.Response'
+        "500":
+          description: 服务器内部错误
+          schema:
+            $ref: '#/definitions/response.Response'
+      summary: 更新作业
+      tags:
+      - 作业管理
+  /api/assignment/{id}/publish:
+    post:
+      description: 教师发布作业
+      parameters:
+      - description: 作业ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 发布成功
+          schema:
+            $ref: '#/definitions/response.Response'
+        "400":
+          description: 请求参数错误
+          schema:
+            $ref: '#/definitions/response.Response'
+        "401":
+          description: 未授权
+          schema:
+            $ref: '#/definitions/response.Response'
+        "403":
+          description: 无权限
+          schema:
+            $ref: '#/definitions/response.Response'
+        "404":
+          description: 作业不存在
+          schema:
+            $ref: '#/definitions/response.Response'
+        "500":
+          description: 服务器内部错误
+          schema:
+            $ref: '#/definitions/response.Response'
+      summary: 发布作业
+      tags:
+      - 作业管理
+  /api/assignment/{id}/statistics:
+    get:
+      description: 教师获取作业统计信息
+      parameters:
+      - description: 作业ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 获取成功
+          schema:
+            $ref: '#/definitions/response.Response'
+        "400":
+          description: 请求参数错误
+          schema:
+            $ref: '#/definitions/response.Response'
+        "401":
+          description: 未授权
+          schema:
+            $ref: '#/definitions/response.Response'
+        "403":
+          description: 无权限
+          schema:
+            $ref: '#/definitions/response.Response'
+        "404":
+          description: 作业不存在
+          schema:
+            $ref: '#/definitions/response.Response'
+        "500":
+          description: 服务器内部错误
+          schema:
+            $ref: '#/definitions/response.Response'
+      summary: 获取作业统计信息
+      tags:
+      - 作业管理
+  /api/assignment/{id}/unpublish:
+    post:
+      description: 教师取消发布作业
+      parameters:
+      - description: 作业ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 取消发布成功
+          schema:
+            $ref: '#/definitions/response.Response'
+        "400":
+          description: 请求参数错误
+          schema:
+            $ref: '#/definitions/response.Response'
+        "401":
+          description: 未授权
+          schema:
+            $ref: '#/definitions/response.Response'
+        "403":
+          description: 无权限
+          schema:
+            $ref: '#/definitions/response.Response'
+        "404":
+          description: 作业不存在
+          schema:
+            $ref: '#/definitions/response.Response'
+        "500":
+          description: 服务器内部错误
+          schema:
+            $ref: '#/definitions/response.Response'
+      summary: 取消发布作业
+      tags:
+      - 作业管理
+  /api/assignment/list:
+    get:
+      description: 获取当前教师的所有作业列表
+      parameters:
+      - default: 1
+        description: 页码
+        in: query
+        name: page
+        type: integer
+      - default: 10
+        description: 每页数量
+        in: query
+        name: page_size
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 获取成功
+          schema:
+            $ref: '#/definitions/response.Response'
+        "400":
+          description: 请求参数错误
+          schema:
+            $ref: '#/definitions/response.Response'
+        "401":
+          description: 未授权
+          schema:
+            $ref: '#/definitions/response.Response'
+        "500":
+          description: 服务器内部错误
+          schema:
+            $ref: '#/definitions/response.Response'
+      summary: 获取教师作业列表
+      tags:
+      - 作业管理
+  /api/attachment/{id}:
+    delete:
+      description: 删除指定附件
+      parameters:
+      - description: 附件ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 删除成功
+          schema:
+            $ref: '#/definitions/response.Response'
+        "400":
+          description: 请求参数错误
+          schema:
+            $ref: '#/definitions/response.Response'
+        "401":
+          description: 未授权
+          schema:
+            $ref: '#/definitions/response.Response'
+        "403":
+          description: 无权限
+          schema:
+            $ref: '#/definitions/response.Response'
+        "404":
+          description: 附件不存在
+          schema:
+            $ref: '#/definitions/response.Response'
+        "500":
+          description: 服务器内部错误
+          schema:
+            $ref: '#/definitions/response.Response'
+      summary: 删除附件
+      tags:
+      - 附件管理
+  /api/attachment/{id}/download:
+    get:
+      description: 下载指定附件
+      parameters:
+      - description: 附件ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/octet-stream
+      responses:
+        "200":
+          description: 文件内容
+          schema:
+            type: file
+        "400":
+          description: 请求参数错误
+          schema:
+            $ref: '#/definitions/response.Response'
+        "404":
+          description: 附件不存在
+          schema:
+            $ref: '#/definitions/response.Response'
+        "500":
+          description: 服务器内部错误
+          schema:
+            $ref: '#/definitions/response.Response'
+      summary: 下载附件
+      tags:
+      - 附件管理
+  /api/attachment/assignment/{assignment_id}:
+    get:
+      description: 获取指定作业的附件列表
+      parameters:
+      - description: 作业ID
+        in: path
+        name: assignment_id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 获取成功
+          schema:
+            $ref: '#/definitions/response.Response'
+        "400":
+          description: 请求参数错误
+          schema:
+            $ref: '#/definitions/response.Response'
+        "500":
+          description: 服务器内部错误
+          schema:
+            $ref: '#/definitions/response.Response'
+      summary: 获取作业附件列表
+      tags:
+      - 附件管理
+    post:
+      consumes:
+      - multipart/form-data
+      description: 教师上传作业附件
+      parameters:
+      - description: 作业ID
+        in: path
+        name: assignment_id
+        required: true
+        type: integer
+      - description: 文件
+        in: formData
+        name: file
+        required: true
+        type: file
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 上传成功
+          schema:
+            $ref: '#/definitions/response.Response'
+        "400":
+          description: 请求参数错误
+          schema:
+            $ref: '#/definitions/response.Response'
+        "401":
+          description: 未授权
+          schema:
+            $ref: '#/definitions/response.Response'
+        "403":
+          description: 无权限
+          schema:
+            $ref: '#/definitions/response.Response'
+        "404":
+          description: 作业不存在
+          schema:
+            $ref: '#/definitions/response.Response'
+        "500":
+          description: 服务器内部错误
+          schema:
+            $ref: '#/definitions/response.Response'
+      summary: 上传附件
+      tags:
+      - 附件管理
   /api/class/{id}:
     delete:
       description: 删除现有班级
@@ -203,6 +1038,435 @@ paths:
       summary: 获取班级列表
       tags:
       - 班级管理
+  /api/grading/assignment/{assignment_id}/progress:
+    get:
+      description: 获取作业的批改进度统计
+      parameters:
+      - description: 作业ID
+        in: path
+        name: assignment_id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 获取成功
+          schema:
+            $ref: '#/definitions/response.Response'
+        "400":
+          description: 请求参数错误
+          schema:
+            $ref: '#/definitions/response.Response'
+        "401":
+          description: 未授权
+          schema:
+            $ref: '#/definitions/response.Response'
+        "403":
+          description: 无权限
+          schema:
+            $ref: '#/definitions/response.Response'
+        "404":
+          description: 作业不存在
+          schema:
+            $ref: '#/definitions/response.Response'
+        "500":
+          description: 服务器内部错误
+          schema:
+            $ref: '#/definitions/response.Response'
+      summary: 获取批改进度
+      tags:
+      - 作业批改
+  /api/grading/assignment/{assignment_id}/publish:
+    post:
+      consumes:
+      - application/json
+      description: 教师发布作业成绩，学生可查看批改结果
+      parameters:
+      - description: 作业ID
+        in: path
+        name: assignment_id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 发布成功
+          schema:
+            $ref: '#/definitions/response.Response'
+        "400":
+          description: 请求参数错误
+          schema:
+            $ref: '#/definitions/response.Response'
+        "401":
+          description: 未授权
+          schema:
+            $ref: '#/definitions/response.Response'
+        "403":
+          description: 无权限
+          schema:
+            $ref: '#/definitions/response.Response'
+        "404":
+          description: 作业不存在
+          schema:
+            $ref: '#/definitions/response.Response'
+        "500":
+          description: 服务器内部错误
+          schema:
+            $ref: '#/definitions/response.Response'
+      summary: 发布成绩
+      tags:
+      - 作业批改
+  /api/grading/assignment/{assignment_id}/submissions:
+    get:
+      description: 教师获取指定作业的待批改提交列表
+      parameters:
+      - description: 作业ID
+        in: path
+        name: assignment_id
+        required: true
+        type: integer
+      - default: 1
+        description: 页码
+        in: query
+        name: page
+        type: integer
+      - default: 10
+        description: 每页数量
+        in: query
+        name: page_size
+        type: integer
+      - description: 提交状态过滤
+        enum:
+        - submitted
+        - graded
+        in: query
+        name: status
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 获取成功
+          schema:
+            $ref: '#/definitions/response.Response'
+        "400":
+          description: 请求参数错误
+          schema:
+            $ref: '#/definitions/response.Response'
+        "401":
+          description: 未授权
+          schema:
+            $ref: '#/definitions/response.Response'
+        "403":
+          description: 无权限
+          schema:
+            $ref: '#/definitions/response.Response'
+        "404":
+          description: 作业不存在
+          schema:
+            $ref: '#/definitions/response.Response'
+        "500":
+          description: 服务器内部错误
+          schema:
+            $ref: '#/definitions/response.Response'
+      summary: 获取待批改提交列表
+      tags:
+      - 作业批改
+  /api/grading/batch:
+    post:
+      consumes:
+      - application/json
+      description: 教师对多个提交进行批量快速批改
+      parameters:
+      - description: 批量批改信息
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/model.BatchGradeRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 批改成功
+          schema:
+            $ref: '#/definitions/response.Response'
+        "400":
+          description: 请求参数错误
+          schema:
+            $ref: '#/definitions/response.Response'
+        "401":
+          description: 未授权
+          schema:
+            $ref: '#/definitions/response.Response'
+        "500":
+          description: 服务器内部错误
+          schema:
+            $ref: '#/definitions/response.Response'
+      summary: 批量快速批改
+      tags:
+      - 作业批改
+  /api/grading/submission/{submission_id}:
+    get:
+      description: 教师获取特定提交的批改详情
+      parameters:
+      - description: 提交ID
+        in: path
+        name: submission_id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 获取成功
+          schema:
+            $ref: '#/definitions/response.Response'
+        "400":
+          description: 请求参数错误
+          schema:
+            $ref: '#/definitions/response.Response'
+        "401":
+          description: 未授权
+          schema:
+            $ref: '#/definitions/response.Response'
+        "403":
+          description: 无权限
+          schema:
+            $ref: '#/definitions/response.Response'
+        "404":
+          description: 提交不存在
+          schema:
+            $ref: '#/definitions/response.Response'
+        "500":
+          description: 服务器内部错误
+          schema:
+            $ref: '#/definitions/response.Response'
+      summary: 获取批改详情
+      tags:
+      - 作业批改
+    post:
+      consumes:
+      - application/json
+      description: 教师批改学生提交的作业
+      parameters:
+      - description: 提交ID
+        in: path
+        name: submission_id
+        required: true
+        type: integer
+      - description: 批改信息
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/model.GradeSubmissionRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 批改成功
+          schema:
+            $ref: '#/definitions/response.Response'
+        "400":
+          description: 请求参数错误
+          schema:
+            $ref: '#/definitions/response.Response'
+        "401":
+          description: 未授权
+          schema:
+            $ref: '#/definitions/response.Response'
+        "403":
+          description: 无权限
+          schema:
+            $ref: '#/definitions/response.Response'
+        "404":
+          description: 提交不存在
+          schema:
+            $ref: '#/definitions/response.Response'
+        "500":
+          description: 服务器内部错误
+          schema:
+            $ref: '#/definitions/response.Response'
+      summary: 批改提交
+      tags:
+      - 作业批改
+  /api/submission/{id}:
+    get:
+      description: 获取提交的详细信息
+      parameters:
+      - description: 提交ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 获取成功
+          schema:
+            $ref: '#/definitions/response.Response'
+        "400":
+          description: 请求参数错误
+          schema:
+            $ref: '#/definitions/response.Response'
+        "401":
+          description: 未授权
+          schema:
+            $ref: '#/definitions/response.Response'
+        "404":
+          description: 提交不存在
+          schema:
+            $ref: '#/definitions/response.Response'
+        "500":
+          description: 服务器内部错误
+          schema:
+            $ref: '#/definitions/response.Response'
+      summary: 获取提交详情
+      tags:
+      - 作业提交
+  /api/submission/assignment/{assignment_id}:
+    get:
+      description: 获取学生特定作业的详细信息和提交状态
+      parameters:
+      - description: 作业ID
+        in: path
+        name: assignment_id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 获取成功
+          schema:
+            $ref: '#/definitions/response.Response'
+        "400":
+          description: 请求参数错误
+          schema:
+            $ref: '#/definitions/response.Response'
+        "401":
+          description: 未授权
+          schema:
+            $ref: '#/definitions/response.Response'
+        "404":
+          description: 作业不存在
+          schema:
+            $ref: '#/definitions/response.Response'
+        "500":
+          description: 服务器内部错误
+          schema:
+            $ref: '#/definitions/response.Response'
+      summary: 获取学生特定作业详情
+      tags:
+      - 作业提交
+  /api/submission/draft:
+    post:
+      consumes:
+      - application/json
+      description: 学生保存作业答案为草稿
+      parameters:
+      - description: 提交信息
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/model.SubmissionRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 保存成功
+          schema:
+            $ref: '#/definitions/response.Response'
+        "400":
+          description: 请求参数错误
+          schema:
+            $ref: '#/definitions/response.Response'
+        "401":
+          description: 未授权
+          schema:
+            $ref: '#/definitions/response.Response'
+        "500":
+          description: 服务器内部错误
+          schema:
+            $ref: '#/definitions/response.Response'
+      summary: 保存作业草稿
+      tags:
+      - 作业提交
+  /api/submission/student/assignments:
+    get:
+      description: 获取当前学生的所有作业列表
+      parameters:
+      - default: 1
+        description: 页码
+        in: query
+        name: page
+        type: integer
+      - default: 10
+        description: 每页数量
+        in: query
+        name: page_size
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 获取成功
+          schema:
+            $ref: '#/definitions/response.Response'
+        "400":
+          description: 请求参数错误
+          schema:
+            $ref: '#/definitions/response.Response'
+        "401":
+          description: 未授权
+          schema:
+            $ref: '#/definitions/response.Response'
+        "500":
+          description: 服务器内部错误
+          schema:
+            $ref: '#/definitions/response.Response'
+      summary: 获取学生作业列表
+      tags:
+      - 作业提交
+  /api/submission/submit:
+    post:
+      consumes:
+      - application/json
+      description: 学生提交作业
+      parameters:
+      - description: 提交信息
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/model.SubmissionRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 提交成功
+          schema:
+            $ref: '#/definitions/response.Response'
+        "400":
+          description: 请求参数错误
+          schema:
+            $ref: '#/definitions/response.Response'
+        "401":
+          description: 未授权
+          schema:
+            $ref: '#/definitions/response.Response'
+        "500":
+          description: 服务器内部错误
+          schema:
+            $ref: '#/definitions/response.Response'
+      summary: 提交作业
+      tags:
+      - 作业提交
   /api/user/login:
     post:
       consumes:

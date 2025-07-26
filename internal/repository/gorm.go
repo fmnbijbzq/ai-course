@@ -66,6 +66,11 @@ func (db *GormDB) Exec(sql string, values ...interface{}) error {
 	return db.DB.Exec(sql, values...).Error
 }
 
+// Raw 实现 DB 接口
+func (db *GormDB) Raw(sql string, values ...interface{}) DB {
+	return &GormDB{DB: db.DB.Raw(sql, values...)}
+}
+
 // Transaction 实现 DB 接口
 func (db *GormDB) Transaction(fc func(tx DB) error) error {
 	return db.DB.Transaction(func(tx *gorm.DB) error {
@@ -92,4 +97,24 @@ func (db *GormDB) Offset(offset int) DB {
 // Limit 实现 DB 接口
 func (db *GormDB) Limit(limit int) DB {
 	return &GormDB{DB: db.DB.Limit(limit)}
+}
+
+// Preload 实现 DB 接口
+func (db *GormDB) Preload(query string, args ...interface{}) DB {
+	return &GormDB{DB: db.DB.Preload(query, args...)}
+}
+
+// Order 实现 DB 接口
+func (db *GormDB) Order(value interface{}) DB {
+	return &GormDB{DB: db.DB.Order(value)}
+}
+
+// Select 实现 DB 接口
+func (db *GormDB) Select(query interface{}, args ...interface{}) DB {
+	return &GormDB{DB: db.DB.Select(query, args...)}
+}
+
+// Scan 实现 DB 接口
+func (db *GormDB) Scan(dest interface{}) error {
+	return db.DB.Scan(dest).Error
 }

@@ -3,3 +3,4 @@ config/*
 prototype/*
 .DS_Store
 *.log
+ai-course

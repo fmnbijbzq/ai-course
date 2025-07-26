@@ -27,7 +27,17 @@ func InitializeApplication() (*app.Application, error) {
 	userService := service.NewUserService(userRepository)
 	classRepository := repository.NewClassRepository(repositoryDB, cache)
 	classService := service.NewClassService(classRepository)
-	application := app.NewApplication(engine, configConfig, userService, classService)
+	assignmentRepository := repository.NewAssignmentRepository(repositoryDB, cache)
+	questionRepository := repository.NewQuestionRepository(repositoryDB, cache)
+	assignmentService := service.NewAssignmentService(assignmentRepository, questionRepository, classRepository)
+	questionService := service.NewQuestionService(questionRepository, assignmentRepository)
+	submissionRepository := repository.NewSubmissionRepository(repositoryDB, cache)
+	answerRepository := repository.NewAnswerRepository(repositoryDB, cache)
+	submissionService := service.NewSubmissionService(submissionRepository, answerRepository, assignmentRepository, questionRepository, questionService)
+	gradingService := service.NewGradingService(submissionRepository, answerRepository, assignmentRepository, questionRepository)
+	attachmentRepository := repository.NewAttachmentRepository(repositoryDB, cache)
+	attachmentService := service.NewAttachmentService(attachmentRepository, assignmentRepository)
+	application := app.NewApplication(engine, configConfig, repositoryDB, userService, classService, assignmentService, questionService, submissionService, gradingService, attachmentService)
 	return application, nil
 }
 

@@ -27,10 +27,20 @@ func InitializeApplication() (*app.Application, error) {
 		repository.NewNoOpCache,
 		repository.NewUserRepository,
 		repository.NewClassRepository,
+		repository.NewAssignmentRepository,
+		repository.NewQuestionRepository,
+		repository.NewSubmissionRepository,
+		repository.NewAnswerRepository,
+		repository.NewAttachmentRepository,
 
 		// Service 层
 		service.NewUserService,
 		service.NewClassService,
+		service.NewAssignmentService,
+		service.NewQuestionService,
+		service.NewSubmissionService,
+		service.NewGradingService,
+		service.NewAttachmentService,
 
 		// Gin 引擎
 		app.NewGinEngine,
